@@ -44,7 +44,7 @@ export default function MainNav() {
                   </Link>
                 </>
               ) : (
-                <>
+                <div className=''>
                   <Link
                     href="/about"
                     className={`hover:text-indigo-300 ${isActive('/about') ? 'text-indigo-300 font-medium' : ''}`}
@@ -63,7 +63,7 @@ export default function MainNav() {
                   >
                     Contact
                   </Link>
-                </>
+                </div>
               )}
             </nav>
           </div>

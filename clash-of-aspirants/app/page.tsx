@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import MainNav from '@/components/MainNav';
@@ -20,11 +21,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <MainNav />
-
       <main className="flex-1 bg-gradient-to-b from-slate-900 to-indigo-900 text-white">
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-5xl font-bold mb-8">Test Your Knowledge, Challenge Your Friends!</h2>
+            <motion.h2
+              className="text-5xl font-bold mb-8"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1 }}
+            >
+              Test Your Knowledge, Challenge Your Friends!
+            </motion.h2>
             <p className="text-xl mb-12">
               Clash of Aspirants is an interactive quiz platform that leverages AI to generate dynamic quiz questions.
               Create or join quiz rooms, compete in real-time, and track your performance on leaderboards.

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff } from 'lucide-react';
-import { text } from 'stream/consumers';
+import Loader from '@/components/ui/loader';
+import {BearAnimation} from '@/components/animation/bear';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -63,6 +64,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
+      <BearAnimation />
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Sign In</h1>
@@ -121,7 +123,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? <Loader/> : 'Sign in'}
             </button>
           </div>
         </form>
