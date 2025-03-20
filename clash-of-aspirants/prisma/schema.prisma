@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String            @id @default(uuid())
+  firebaseUid       String            @unique
+  email             String            @unique
+  username          String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  score             Int               @default(0)
+  quizRooms         QuizRoom[]        @relation("RoomCreator")
+  participatedRooms RoomParticipant[]
+  answers           Answer[]
+}
+
+model QuizRoom {
+  id            String            @id @default(uuid())
+  name          String
+  topic         String
+  creatorId     String
+  creator       User              @relation("RoomCreator", fields: [creatorId], references: [id])
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  participants  RoomParticipant[]
+  questions     Question[]
+}
+
+model RoomParticipant {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  roomId     String
+  room       QuizRoom @relation(fields: [roomId], references: [id])
+  joinedAt   DateTime @default(now())
+  score      Int      @default(0)
+  isActive   Boolean  @default(true)
+
+  @@unique([userId, roomId])
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  roomId      String
+  room        QuizRoom @relation(fields: [roomId], references: [id])
+  content     String
+  options     Json // Array of options as JSON
+  correctOption Int
+  explanation String?
+  createdAt   DateTime @default(now())
+  answers     Answer[]
+}
+
+model Answer {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+  selectedOption Int
+  isCorrect   Boolean
+  answeredAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
+} 
