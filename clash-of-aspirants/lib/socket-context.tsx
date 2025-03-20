@@ -29,37 +29,59 @@ const SocketContext = createContext<SocketContextType | undefined>(undefined);
 export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
-    // Create a socket connection using our server endpoint
-    const socketInstance = io({
-      path: '/api/socket',
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
+    let socketInstance: Socket | null = null;
+    
+    try {
+      // Create a socket connection using our server endpoint
+      socketInstance = io({
+        path: '/api/socket',
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 1000,
+        timeout: 5000
+      });
 
-    socketInstance.on('connect', () => {
-      console.log('Socket connected:', socketInstance.id);
-      setConnected(true);
-    });
+      socketInstance.on('connect', () => {
+        console.log('Socket connected:', socketInstance?.id);
+        setConnected(true);
+        setConnectionError(null);
+      });
 
-    socketInstance.on('disconnect', () => {
-      console.log('Socket disconnected');
-      setConnected(false);
-    });
+      socketInstance.on('disconnect', () => {
+        console.log('Socket disconnected');
+        setConnected(false);
+      });
 
-    socketInstance.on('connect_error', (err) => {
-      console.error('Connection error:', err.message);
-    });
+      socketInstance.on('connect_error', (err) => {
+        console.warn('Socket connection error:', err.message);
+        setConnectionError(err.message);
+        
+        // After a few attempts, stop trying to reconnect to avoid console spam
+        if (socketInstance && socketInstance.io.attempts >= 3) {
+          console.log('Failed to connect to socket server after multiple attempts. Stopping reconnection.');
+          socketInstance.io.reconnection(false);
+          
+          // Inform user but proceed with app functionality
+          console.log('The app will continue to function, but real-time features will be unavailable.');
+        }
+      });
 
-    setSocket(socketInstance);
+      setSocket(socketInstance);
+    } catch (error) {
+      console.error('Error initializing socket:', error);
+      setConnectionError('Failed to initialize socket');
+    }
 
     // Cleanup on unmount
     return () => {
-      socketInstance.disconnect();
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
     };
   }, []);
 
@@ -67,6 +89,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const joinRoom = (roomId: string) => {
     if (socket && connected) {
       socket.emit('join-room', roomId);
+    } else {
+      console.log(`[Mock Socket] Joining room: ${roomId}`);
     }
   };
 
@@ -74,6 +98,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const leaveRoom = (roomId: string) => {
     if (socket && connected) {
       socket.emit('leave-room', roomId);
+    } else {
+      console.log(`[Mock Socket] Leaving room: ${roomId}`);
     }
   };
 
@@ -99,6 +125,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         answer,
         isCorrect,
       });
+    } else {
+      console.log(`[Mock Socket] Submitting answer: roomId=${roomId}, userId=${userId}, questionId=${questionId}, answer=${answer}, isCorrect=${isCorrect}`);
     }
   };
 
