@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { motion } from "framer-motion";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { SocketProvider } from "@/lib/socket-context";
