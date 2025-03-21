@@ -34,6 +34,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let socketInstance: Socket | null = null;
+    let reconnectionAttempts = 0; // Custom counter for reconnection attempts
     
     try {
       // Create a socket connection using our server endpoint
@@ -50,6 +51,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         console.log('Socket connected:', socketInstance?.id);
         setConnected(true);
         setConnectionError(null);
+        reconnectionAttempts = 0; // Reset counter on successful connection
       });
 
       socketInstance.on('disconnect', () => {
@@ -60,11 +62,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socketInstance.on('connect_error', (err) => {
         console.warn('Socket connection error:', err.message);
         setConnectionError(err.message);
-        
-        // After a few attempts, stop trying to reconnect to avoid console spam
-        if (socketInstance && socketInstance.io.attempts >= 3) {
+        reconnectionAttempts += 1;
+
+        if (reconnectionAttempts >= 3) {
           console.log('Failed to connect to socket server after multiple attempts. Stopping reconnection.');
-          socketInstance.io.reconnection(false);
+          socketInstance?.io.reconnection(false);
           
           // Inform user but proceed with app functionality
           console.log('The app will continue to function, but real-time features will be unavailable.');

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { generateQuizQuestions } from '@/lib/openai';
 
 // GET: Fetch all active quiz rooms
 export async function GET(req: NextRequest) {
@@ -28,6 +29,8 @@ export async function GET(req: NextRequest) {
           createdAt: 'desc',
         },
       });
+
+      console.log(rooms);
 
       // Format rooms to match the structure expected by the client
       const formattedRooms = rooms.map((room:any) => ({
@@ -124,6 +127,22 @@ export async function POST(req: NextRequest) {
           roomId: room.id,
         },
       });
+
+      // Generate questions using OpenAI
+      const aiQuestions = await generateQuizQuestions(topic, 5); // Assuming 5 questions for simplicity
+
+      // Store generated questions in the database
+      for (const question of aiQuestions) {
+        await prisma.question.create({
+          data: {
+            roomId: room.id,
+            content: question.question,
+            options: question.options,
+            correctOption: question.correctOptionIndex,
+            explanation: question.explanation,
+          },
+        });
+      }
 
       return NextResponse.json({ room });
     } catch (dbError) {
