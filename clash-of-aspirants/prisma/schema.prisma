@@ -30,8 +30,11 @@ model QuizRoom {
   creatorId     String
   creator       User              @relation("RoomCreator", fields: [creatorId], references: [id])
   isActive      Boolean           @default(true)
+  joinCode      String            @unique @default("")
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+  endTime       DateTime?
+  metadata      Json?             // Additional data as JSON
   participants  RoomParticipant[]
   questions     Question[]
 }

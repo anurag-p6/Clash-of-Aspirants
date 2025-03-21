@@ -1,20 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
-  uid: string;
+type Params = {
+  params: {
+    uid: string;
+  };
 }
 
 // GET: Fetch rooms created by a user
-export async function GET(req: NextRequest, context: { params: RouteParams }) {
+export async function GET(req: NextRequest, { params }: Params) {
   try {
-    const { uid } = context.params;
+    // Always validate and get the userId from params first
+    const firebaseUid = params.uid;
+    if (!firebaseUid) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
 
     try {
       // First get the user's ID from the Firebase UID
       const user = await prisma.user.findUnique({
         where: {
-          firebaseUid: uid,
+          firebaseUid,
         },
         select: {
           id: true,
@@ -73,7 +82,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
           topic: "History",
           participantCount: 4,
           createdAt: new Date().toISOString(),
-          creatorName: `User-${uid.substring(0, 5)}`,
+          creatorName: `User-${firebaseUid.substring(0, 5)}`,
         },
         {
           id: `mock-room-2-${Date.now()}`,
@@ -81,7 +90,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
           topic: "Science",
           participantCount: 2,
           createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          creatorName: `User-${uid.substring(0, 5)}`,
+          creatorName: `User-${firebaseUid.substring(0, 5)}`,
         }
       ];
       

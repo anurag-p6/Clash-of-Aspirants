@@ -1,22 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type Params = {
   params: {
     id: string;
   };
 }
 
 // GET: Fetch all questions for a specific room
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(req: NextRequest, { params }: Params) {
   try {
-    const { id } = params;
+    // Always validate and get the roomId from params first
+    const roomId = params.id;
+    if (!roomId) {
+      return NextResponse.json(
+        { error: 'Room ID is required' },
+        { status: 400 }
+      );
+    }
 
     try {
       // Check if the room exists and is active
       const room = await prisma.quizRoom.findUnique({
         where: {
-          id,
+          id: roomId,
           isActive: true,
         },
       });
@@ -32,7 +39,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       // This prevents cheating by inspecting the API response
       const questions = await prisma.question.findMany({
         where: {
-          roomId: id,
+          roomId,
         },
         select: {
           id: true,

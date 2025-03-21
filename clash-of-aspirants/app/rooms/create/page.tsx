@@ -14,6 +14,7 @@ export default function CreateRoomPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [createdRoom, setCreatedRoom] = useState<{ id: string; name: string } | null>(null);
+  const [status, setStatus] = useState<string>('');
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -38,24 +39,36 @@ export default function CreateRoomPage() {
 
     setError('');
     setIsLoading(true);
+    setStatus('Creating quiz room...');
 
     try {
       // Create the room
+      setStatus('Creating quiz room...');
+      console.log(`Creating room: ${name} with topic: ${topic}`);
+      
       const roomResponse = await fetch('/api/rooms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
         body: JSON.stringify({
           name,
           topic,
           creatorId: user?.id,
         }),
+        cache: 'no-store'
       });
 
       if (!roomResponse.ok) {
-        const errorData = await roomResponse.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to create room');
+        let errorMessage = 'Failed to create room';
+        try {
+          const errorData = await roomResponse.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       let roomData;
@@ -67,23 +80,49 @@ export default function CreateRoomPage() {
       }
 
       const roomId = roomData.room.id;
+      console.log(`Room created with ID: ${roomId}`);
 
       // Generate questions for the room
+      setStatus('Generating questions with AI...');
+      console.log(`Generating ${numQuestions} questions on topic: ${topic}`);
+      
       const questionsResponse = await fetch('/api/questions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
         body: JSON.stringify({
           topic,
           numQuestions,
           roomId,
         }),
+        cache: 'no-store'
       });
 
       if (!questionsResponse.ok) {
-        const errorData = await questionsResponse.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to generate questions');
+        let errorMessage = 'Failed to generate questions';
+        try {
+          const errorText = await questionsResponse.text();
+          console.error('Error response from questions API:', errorText);
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {
+            // If it's not valid JSON, just log the error
+          }
+        } catch (e) {
+          console.error('Error reading error response:', e);
+        }
+        throw new Error(errorMessage);
+      }
+
+      try {
+        const questionsData = await questionsResponse.json();
+        console.log(`Generated ${questionsData.questions.length} questions`);
+      } catch (jsonError) {
+        console.error('Error parsing questions response:', jsonError);
+        // Continue even if we can't parse the response - the questions might still be created
       }
 
       // Set the created room to show sharing options
@@ -97,6 +136,7 @@ export default function CreateRoomPage() {
       setError(error.message || 'Failed to create room. Please try again.');
     } finally {
       setIsLoading(false);
+      setStatus('');
     }
   };
 
@@ -255,7 +295,7 @@ export default function CreateRoomPage() {
                         {isLoading ? (
                           <div className="flex items-center justify-center">
                             <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
-                            Creating Quiz Room...
+                            {status || "Creating Quiz Room..."}
                           </div>
                         ) : (
                           'Create Quiz Room'

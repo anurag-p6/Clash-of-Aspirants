@@ -1,22 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type Params = {
   params: {
     id: string;
-  };
-}
+  }
+};
 
 // GET: Fetch all participants for a room
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(req: NextRequest, { params }: Params) {
   try {
-    const { id } = params;
+    // Always validate and get the roomId from params first
+    const roomId = params.id;
+    if (!roomId) {
+      return NextResponse.json(
+        { error: 'Room ID is required' },
+        { status: 400 }
+      );
+    }
 
     try {
       // Check if the room exists and is active
       const room = await prisma.quizRoom.findUnique({
         where: {
-          id,
+          id: roomId,
           isActive: true,
         },
       });
@@ -31,7 +38,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       // Fetch participants with their scores
       const participants = await prisma.roomParticipant.findMany({
         where: {
-          roomId: id,
+          roomId,
         },
         include: {
           user: {
@@ -54,7 +61,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         {
           id: "mock-participant-1",
           userId: "mock-user-1",
-          roomId: id,
+          roomId,
           score: 3,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -66,7 +73,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         {
           id: "mock-participant-2",
           userId: "mock-user-2",
-          roomId: id,
+          roomId,
           score: 2,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -89,11 +96,29 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 // POST: Add a participant to a room
-export async function POST(req: NextRequest, { params }: RouteParams) {
+export async function POST(req: NextRequest, { params }: Params) {
   try {
-    const { id } = params;
-    const { userId } = await req.json();
-
+    // Always validate and get the roomId from params first
+    const roomId = params.id;
+    if (!roomId) {
+      return NextResponse.json(
+        { error: 'Room ID is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Parse the request body
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+    
+    const { userId } = body;
     if (!userId) {
       return NextResponse.json(
         { error: 'User ID is required' },
@@ -104,7 +129,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Check if the room exists and is active
     const room = await prisma.quizRoom.findUnique({
       where: {
-        id,
+        id: roomId,
         isActive: true,
       },
     });
@@ -121,7 +146,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       where: {
         userId_roomId: {
           userId,
-          roomId: id,
+          roomId,
         },
       },
     });
@@ -148,7 +173,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const participant = await prisma.roomParticipant.create({
       data: {
         userId,
-        roomId: id,
+        roomId,
       },
     });
 

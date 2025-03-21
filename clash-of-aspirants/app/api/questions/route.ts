@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("🔄 Questions API: Request received");
+    
     // Parse JSON with error handling
     let body;
     try {
@@ -17,6 +19,7 @@ export async function POST(req: NextRequest) {
     }
     
     const { topic, numQuestions = 5, roomId } = body;
+    console.log(`📝 Questions API: Generating ${numQuestions} questions on "${topic}" for room ${roomId}`);
 
     if (!topic) {
       return NextResponse.json(
@@ -32,13 +35,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate questions using OpenAI
+    // Generate questions using Gemini API
+    console.log("🤖 Questions API: Calling Gemini API to generate questions");
     const aiQuestions = await generateQuizQuestions(topic, numQuestions);
+    console.log(`✅ Questions API: Generated ${aiQuestions.length} questions successfully`);
+    
+    if (aiQuestions.length === 0) {
+      console.log("⚠️ No questions generated, falling back to mock data");
+      return NextResponse.json(
+        { error: 'Failed to generate questions' },
+        { status: 500 }
+      );
+    }
 
     try {
       // Store questions in the database
+      console.log("💾 Questions API: Saving questions to database");
       const questions = await Promise.all(
-        aiQuestions.map(async (q) => {
+        aiQuestions.map(async (q, index) => {
+          console.log(`Saving question ${index + 1}:`, q.question.substring(0, 30) + '...');
+          
           return prisma.question.create({
             data: {
               roomId,
@@ -50,14 +66,15 @@ export async function POST(req: NextRequest) {
           });
         })
       );
+      console.log(`✅ Questions API: Saved ${questions.length} questions to database`);
 
       return NextResponse.json({ questions });
     } catch (dbError) {
       console.error('Database error storing questions:', dbError);
       
-      // Create mock question data with IDs
-      const mockQuestions = aiQuestions.map((q, index) => ({
-        id: `mock-question-${Date.now()}-${index}`,
+      // Create question data with IDs but don't save to DB
+      const questionsWithIds = aiQuestions.map((q, index) => ({
+        id: `generated-question-${Date.now()}-${index}`,
         roomId,
         content: q.question,
         options: q.options,
@@ -66,11 +83,11 @@ export async function POST(req: NextRequest) {
         createdAt: new Date().toISOString()
       }));
       
-      console.log('Returning mock question data for development:', mockQuestions.length, 'questions');
-      return NextResponse.json({ questions: mockQuestions });
+      console.log('⚠️ Database error, returning generated questions with temp IDs:', questionsWithIds.length, 'questions');
+      return NextResponse.json({ questions: questionsWithIds });
     }
   } catch (error) {
-    console.error('Error generating questions:', error);
+    console.error('❌ Error generating questions:', error);
     return NextResponse.json(
       { error: 'Failed to generate questions' },
       { status: 500 }

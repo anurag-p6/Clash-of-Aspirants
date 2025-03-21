@@ -28,6 +28,7 @@ interface Room {
   id: string;
   name: string;
   topic: string;
+  joinCode: string;
   creator: {
     id: string;
     username: string;
@@ -138,6 +139,7 @@ export default function RoomPage({ params }: { params: PageParams | Promise<Page
             id: roomId,
             name: "Mock Quiz Room",
             topic: "General Knowledge",
+            joinCode: "ABC123",
             isActive: true,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -163,6 +165,7 @@ export default function RoomPage({ params }: { params: PageParams | Promise<Page
               id: roomId,
               name: "Mock Quiz Room",
               topic: "General Knowledge",
+              joinCode: "ABC123",
               isActive: true,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
@@ -532,11 +535,13 @@ export default function RoomPage({ params }: { params: PageParams | Promise<Page
           <div className="flex items-center space-x-4">
             <div className="bg-slate-800 px-3 py-2 rounded-md flex items-center">
               <span className="text-sm text-slate-300 mr-2">Room Code:</span>
-              <span className="font-medium text-white">{roomId}</span>
+              <span className="font-medium text-white">{room?.joinCode || "Loading..."}</span>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(roomId);
-                  alert("Room code copied to clipboard!");
+                  if (room?.joinCode) {
+                    navigator.clipboard.writeText(room.joinCode);
+                    alert("Room code copied to clipboard!");
+                  }
                 }}
                 className="ml-2 text-slate-300 hover:text-white"
                 title="Copy room code"
