@@ -3,24 +3,23 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { Logo } from '@/public/logo';
 
 export default function MainNav() {
   const pathname = usePathname();
   const { user, loading, signOut } = useAuth();
 
-  const isActive = (path: string) => {
-    return pathname === path;
-  };
+  const isActive = (path: string) => pathname === path;
 
   return (
     <header className="bg-slate-900 text-white">
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
+          {/* Left Side - Logo */}
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold">
-              Clash of Aspirants
-            </Link>
-            
+            <Logo />
+
+            {/* Navigation Links */}
             <nav className="hidden md:flex space-x-6">
               {!loading && user ? (
                 <>
@@ -67,7 +66,8 @@ export default function MainNav() {
               )}
             </nav>
           </div>
-          
+
+          {/* Right Side - User Authentication */}
           <div className="flex items-center space-x-4">
             {!loading && user ? (
               <>
@@ -81,10 +81,7 @@ export default function MainNav() {
               </>
             ) : !loading ? (
               <>
-                <Link
-                  href="/auth/login"
-                  className="hover:text-indigo-300"
-                >
+                <Link href="/auth/login" className="hover:text-indigo-300">
                   Sign In
                 </Link>
                 <Link
@@ -104,4 +101,4 @@ export default function MainNav() {
       </div>
     </header>
   );
-} 
+}
