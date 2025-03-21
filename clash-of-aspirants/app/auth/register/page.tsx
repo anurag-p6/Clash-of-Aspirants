@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff} from "lucide-react"
+import { BearAnimation } from '@/components/animation/bear';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -75,7 +76,8 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+      <BearAnimation />
+      <div className="max-w-md w-full space-y-8 bg-white p-8 mr-12 rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Create an Account</h1>
           <p className="mt-2 text-gray-600">Join Clash of Aspirants and test your knowledge!</p>

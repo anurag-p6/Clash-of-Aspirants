@@ -1,6 +1,7 @@
+import Link from "next/link";
 export const Logo = () => {
     return (    
-        <div className="border-none border-[#0f172b] rounded-2xl overflow-hidden">
+        <Link className="border-none border-[#0f172b] rounded-2xl overflow-hidden cursor-pointer" href="/">
         <svg 
             version="1.0" 
             xmlns="http://www.w3.org/2000/svg" 
@@ -10,7 +11,7 @@ export const Logo = () => {
             preserveAspectRatio="xMidYMid meet"
         >
             {/* Background */}
-            <rect width="100%" height="100%" fill="white" />
+            <circle fill="white" cx="240px" cy="220px" r="40%" />
 
             <g 
                 transform="translate(0.000000,500.000000) scale(0.100000,-0.100000)"
@@ -40,6 +41,6 @@ export const Logo = () => {
                 74 70 21 25 22 30 9 60 -7 19 -34 96 -61 172 l-47 137 -397 0 -397 0 -68 -192z"/>
             </g>
         </svg>
-        </div>
+        </Link>
     );
 }

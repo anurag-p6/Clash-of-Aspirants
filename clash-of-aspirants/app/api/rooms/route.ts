@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
       });
 
       // Format rooms to match the structure expected by the client
-      const formattedRooms = rooms.map(room => ({
+      const formattedRooms = rooms.map((room:any) => ({
         id: room.id,
         name: room.name,
         topic: room.topic,

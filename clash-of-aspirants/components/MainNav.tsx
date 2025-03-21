@@ -12,15 +12,16 @@ export default function MainNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="bg-slate-900 text-white">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center">
+    <header className="bg-slate-900 text-white border-b-[0.01rem] border-slate-500">
+      <div className="container mx-auto px-4 py-6 flex justify-between">
+        <div className="flex justify-end items-center">
           {/* Left Side - Logo */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center justify-evenly space-x-8">
             <Logo />
+          </div>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex space-x-6">
+            <nav className="hidden md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
               {!loading && user ? (
                 <>
                   <Link
@@ -43,7 +44,7 @@ export default function MainNav() {
                   </Link>
                 </>
               ) : (
-                <div className=''>
+                <>
                   <Link
                     href="/about"
                     className={`hover:text-indigo-300 ${isActive('/about') ? 'text-indigo-300 font-medium' : ''}`}
@@ -62,13 +63,13 @@ export default function MainNav() {
                   >
                     Contact
                   </Link>
-                </div>
+                </>
               )}
             </nav>
           </div>
 
           {/* Right Side - User Authentication */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 ">
             {!loading && user ? (
               <>
                 <span className="hidden md:inline">Hi, {user.username}</span>
@@ -98,7 +99,7 @@ export default function MainNav() {
             )}
           </div>
         </div>
-      </div>
+      
     </header>
   );
 }

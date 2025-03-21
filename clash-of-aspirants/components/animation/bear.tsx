@@ -4,7 +4,7 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 export const BearAnimation= () => {
   return (
     <DotLottieReact
-      src="https://lottie.host/2505befb-553e-4ca7-bba7-c4b8df330fe9/jIvMmx49XU.lottie"
+      src="https://lottie.host/848dcbe7-863b-4a97-aa89-167795367ef1/oiMvaPfIWp.lottie"
       loop
       autoplay
     />

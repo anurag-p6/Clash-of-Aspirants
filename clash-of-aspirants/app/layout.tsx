@@ -11,6 +11,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Clash of Aspirants - Interactive Quiz Platform",
   description: "An interactive quiz platform that leverages OpenAI to generate dynamic quiz questions.",
+  icons:{
+    icon:"/logo.svg",
+  }
 };
 
 export default function RootLayout({
