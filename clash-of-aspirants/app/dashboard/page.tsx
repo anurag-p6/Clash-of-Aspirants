@@ -21,6 +21,11 @@ export default function DashboardPage() {
   const router = useRouter();
   const [activeRooms, setActiveRooms] = useState<QuizRoom[]>([]);
   const [userRooms, setUserRooms] = useState<QuizRoom[]>([]);
+  const [userStats, setUserStats] = useState({
+    totalScore: 0,
+    roomsJoined: 0,
+    correctAnswers: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -75,6 +80,24 @@ export default function DashboardPage() {
           setUserRooms([]);
         }
         
+        // Fetch user stats
+        try {
+          const statsResponse = await fetch(`/api/users/${user.id}/stats`);
+          
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            if (statsData.stats) {
+              setUserStats({
+                totalScore: statsData.stats.totalScore || 0,
+                roomsJoined: statsData.stats.quizzesJoined || 0, 
+                correctAnswers: statsData.stats.correctAnswers || 0
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user stats:', error);
+        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching rooms:', error);
@@ -119,7 +142,7 @@ export default function DashboardPage() {
                 <h3 className="text-xl font-bold mb-4">Your Statistics</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{user?.score || 0}</div>
+                    <div className="text-2xl font-bold text-indigo-600">{userStats.totalScore}</div>
                     <div className="text-sm text-gray-500">Total Score</div>
                   </div>
                   <div className="bg-slate-100 p-4 rounded-md text-center">
@@ -127,11 +150,11 @@ export default function DashboardPage() {
                     <div className="text-sm text-gray-500">Rooms Created</div>
                   </div>
                   <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">0</div>
+                    <div className="text-2xl font-bold text-indigo-600">{userStats.roomsJoined}</div>
                     <div className="text-sm text-gray-500">Rooms Joined</div>
                   </div>
                   <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">0</div>
+                    <div className="text-2xl font-bold text-indigo-600">{userStats.correctAnswers}</div>
                     <div className="text-sm text-gray-500">Correct Answers</div>
                   </div>
                 </div>

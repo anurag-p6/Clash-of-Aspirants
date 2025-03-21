@@ -26,6 +26,11 @@ export default function CreateRoomPage() {
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user || !user.id) {
+      setError('You must be logged in to create a room');
+      return;
+    }
+    
     if (!name.trim() || !topic.trim()) {
       setError('Room name and topic are required');
       return;
@@ -40,6 +45,8 @@ export default function CreateRoomPage() {
     setIsLoading(true);
 
     try {
+      console.log('Creating room with creator ID:', user.id);
+      
       // Create the room
       const roomResponse = await fetch('/api/rooms', {
         method: 'POST',
@@ -49,7 +56,7 @@ export default function CreateRoomPage() {
         body: JSON.stringify({
           name,
           topic,
-          creatorId: user?.id,
+          creatorId: user.id,
           numQuestions
         }),
       });

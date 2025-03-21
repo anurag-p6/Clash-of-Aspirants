@@ -13,6 +13,8 @@ interface UserStats {
   quizzesJoined: number;
   correctAnswers: number;
   incorrectAnswers: number;
+  totalAnswers: number;
+  accuracy: number;
 }
 
 export default function ProfilePage() {
@@ -23,9 +25,12 @@ export default function ProfilePage() {
     quizzesCreated: 0,
     quizzesJoined: 0,
     correctAnswers: 0,
-    incorrectAnswers: 0
+    incorrectAnswers: 0,
+    totalAnswers: 0,
+    accuracy: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -35,33 +40,30 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserStats = async () => {
-      if (!user) return;
+      if (!user || !user.id) return;
       
       try {
         setIsLoading(true);
+        setError(null);
         
-        // We would typically fetch this from an API endpoint
-        // For now, we'll use mock data
-        const mockStats = {
-          totalScore: user.score || 0,
-          quizzesCreated: 3,
-          quizzesJoined: 5,
-          correctAnswers: 42,
-          incorrectAnswers: 18
-        };
+        // Fetch user stats from the API
+        const response = await fetch(`/api/users/${user.id}/stats`);
         
-        // Simulate API call delay
-        setTimeout(() => {
-          setUserStats(mockStats);
-          setIsLoading(false);
-        }, 500);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `Error fetching stats: ${response.status}`);
+        }
         
-        // In a real application, we would fetch from an API:
-        // const response = await fetch(`/api/users/${user.id}/stats`);
-        // const data = await response.json();
-        // setUserStats(data);
-      } catch (error) {
+        const data = await response.json();
+        if (data.stats) {
+          setUserStats(data.stats);
+        } else {
+          throw new Error('Invalid stats data received');
+        }
+      } catch (error: any) {
         console.error('Error fetching user stats:', error);
+        setError(error.message || 'Failed to load user statistics');
+      } finally {
         setIsLoading(false);
       }
     };
@@ -128,25 +130,51 @@ export default function ProfilePage() {
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-indigo-50 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{userStats.quizzesCreated}</div>
-                    <div className="text-sm text-gray-500">Quizzes Created</div>
-                  </div>
-                  <div className="bg-indigo-50 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{userStats.quizzesJoined}</div>
-                    <div className="text-sm text-gray-500">Quizzes Joined</div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-green-600">{userStats.correctAnswers}</div>
-                    <div className="text-sm text-gray-500">Correct Answers</div>
-                  </div>
-                  <div className="bg-red-50 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-red-600">{userStats.incorrectAnswers}</div>
-                    <div className="text-sm text-gray-500">Incorrect Answers</div>
-                  </div>
+              ) : error ? (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
                 </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-indigo-50 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-indigo-600">{userStats.quizzesCreated}</div>
+                      <div className="text-sm text-gray-500">Quizzes Created</div>
+                    </div>
+                    <div className="bg-indigo-50 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-indigo-600">{userStats.quizzesJoined}</div>
+                      <div className="text-sm text-gray-500">Quizzes Joined</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-green-600">{userStats.correctAnswers}</div>
+                      <div className="text-sm text-gray-500">Correct Answers</div>
+                    </div>
+                    <div className="bg-red-50 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-red-600">{userStats.incorrectAnswers}</div>
+                      <div className="text-sm text-gray-500">Incorrect Answers</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-md">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-500">Total Questions Answered</span>
+                        <span className="font-bold">{userStats.totalAnswers}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Accuracy</span>
+                        <span className="font-bold text-indigo-600">{userStats.accuracy}%</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-indigo-50 p-4 rounded-md">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-indigo-600">{userStats.totalScore}</div>
+                        <div className="text-sm text-gray-500">Total Score</div>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
 
