@@ -20,6 +20,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     try {
+      console.log(`Fetching rooms for user ID: ${uid}`);
+      
       // Get the rooms created by this user
       const rooms = await prisma.quizRoom.findMany({
         where: {
@@ -43,6 +45,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         },
       });
 
+      console.log(`Found ${rooms.length} rooms for user ID: ${uid}`);
+      
       // Format the rooms to match the expected structure in the client
       const formattedRooms = rooms.map((room) => ({
         id: room.id,
@@ -50,12 +54,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         topic: room.topic,
         participantCount: room._count.participants,
         createdAt: room.createdAt.toISOString(),
-        creatorName: room.creator.username,
+        creatorName: room.creator?.username || 'Unknown User',
       }));
 
       return NextResponse.json({ rooms: formattedRooms });
     } catch (dbError) {
       console.error('Database error fetching user rooms:', dbError);
+      console.error('Error details:', JSON.stringify(dbError, null, 2));
       return NextResponse.json(
         { error: 'Database error fetching user rooms' },
         { status: 500 }
@@ -63,6 +68,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
   } catch (error) {
     console.error('Error fetching user rooms:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     return NextResponse.json(
       { error: 'Failed to fetch user rooms' },
       { status: 500 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import MainNav from '@/components/MainNav';
 import Footer from '@/components/Footer';
+import { auth } from '@/lib/firebase';
 
 interface UserStats {
   totalScore: number;
@@ -18,8 +19,9 @@ interface UserStats {
 }
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, firebaseUser } = useAuth();
   const router = useRouter();
+  const [memberSince, setMemberSince] = useState<Date | null>(null);
   const [userStats, setUserStats] = useState<UserStats>({
     totalScore: 0,
     quizzesCreated: 0,
@@ -37,6 +39,14 @@ export default function ProfilePage() {
       router.push('/auth/login');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    // Get Firebase user metadata for account creation date
+    if (firebaseUser && firebaseUser.metadata && firebaseUser.metadata.creationTime) {
+      const creationTime = new Date(firebaseUser.metadata.creationTime);
+      setMemberSince(creationTime);
+    }
+  }, [firebaseUser]);
 
   useEffect(() => {
     const fetchUserStats = async () => {
@@ -114,7 +124,16 @@ export default function ProfilePage() {
                 <div>
                   <div className="mb-4">
                     <label className="block text-gray-500 text-sm mb-1">Member Since</label>
-                    <div className="font-medium">{new Date(user.createdAt || Date.now()).toLocaleDateString()}</div>
+                    <div className="font-medium">
+                      {memberSince 
+                        ? memberSince.toLocaleDateString(undefined, { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          }) 
+                        : new Date(user.createdAt || Date.now()).toLocaleDateString()
+                      }
+                    </div>
                   </div>
                   <div>
                     <label className="block text-gray-500 text-sm mb-1">Total Score</label>

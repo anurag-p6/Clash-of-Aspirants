@@ -26,8 +26,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/leaderboard" className="text-slate-300 hover:text-white">
-                  Leaderboard
+                <Link href="/pricing" className="text-slate-300 hover:text-white">
+                  Pricing
                 </Link>
               </li>
               <li>

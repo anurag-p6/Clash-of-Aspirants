@@ -38,6 +38,7 @@ export default function DashboardPage() {
     const fetchRooms = async () => {
       if (!user || !user.id) {
         console.log('User not fully loaded yet, skipping room fetch');
+        setIsLoading(false);
         return;
       }
       
@@ -46,15 +47,10 @@ export default function DashboardPage() {
         
         // Fetch active rooms
         const roomsResponse = await fetch('/api/rooms');
-        
         let roomsData;
         try {
           roomsData = await roomsResponse.json();
-          if (roomsData.rooms) {
-            setActiveRooms(roomsData.rooms);
-          } else {
-            setActiveRooms([]);
-          }
+          setActiveRooms(roomsData.rooms || []);
         } catch (jsonError) {
           console.error('Error parsing rooms response:', jsonError);
           setActiveRooms([]);
@@ -63,16 +59,10 @@ export default function DashboardPage() {
         // Fetch user's rooms
         try {
           const userRoomsResponse = await fetch(`/api/users/${user.id}/rooms`);
-          
           if (userRoomsResponse.ok) {
             const userRoomsData = await userRoomsResponse.json();
-            if (userRoomsData.rooms) {
-              setUserRooms(userRoomsData.rooms);
-            } else {
-              setUserRooms([]);
-            }
+            setUserRooms(userRoomsData.rooms || []);
           } else {
-            console.error(`Failed to fetch user rooms: ${userRoomsResponse.status}`);
             setUserRooms([]);
           }
         } catch (error) {
@@ -83,16 +73,13 @@ export default function DashboardPage() {
         // Fetch user stats
         try {
           const statsResponse = await fetch(`/api/users/${user.id}/stats`);
-          
           if (statsResponse.ok) {
             const statsData = await statsResponse.json();
-            if (statsData.stats) {
               setUserStats({
-                totalScore: statsData.stats.totalScore || 0,
-                roomsJoined: statsData.stats.quizzesJoined || 0, 
-                correctAnswers: statsData.stats.correctAnswers || 0
-              });
-            }
+              totalScore: statsData.stats?.totalScore || 0,
+              roomsJoined: statsData.stats?.quizzesJoined || 0, 
+              correctAnswers: statsData.stats?.correctAnswers || 0
+            });
           }
         } catch (error) {
           console.error('Error fetching user stats:', error);
@@ -109,6 +96,8 @@ export default function DashboardPage() {
     
     if (user) {
       fetchRooms();
+    } else {
+      setIsLoading(false);
     }
   }, [user]);
 
@@ -118,118 +107,99 @@ export default function DashboardPage() {
 
       <main className="flex-1 bg-slate-100">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold">Dashboard</h2>
-            <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">Dashboard</h2>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-0">
               <Link
                 href="/rooms/join"
-                className="border border-indigo-600 text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-md"
+                className="border border-indigo-600 text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-md text-center"
               >
                 Join Room
               </Link>
               <Link
                 href="/rooms/create"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-center"
               >
                 Create Room
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* User Statistics Section */}
             <div>
-              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 className="text-xl font-bold mb-4">Your Statistics</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{userStats.totalScore}</div>
-                    <div className="text-sm text-gray-500">Total Score</div>
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 className="text-lg sm:text-xl font-bold mb-4">Your Statistics</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Total Score', value: userStats.totalScore },
+                    { label: 'Rooms Created', value: userRooms.length },
+                    { label: 'Rooms Joined', value: userStats.roomsJoined },
+                    { label: 'Correct Answers', value: userStats.correctAnswers }
+                  ].map((stat, index) => (
+                    <div key={index} className="bg-slate-100 p-4 rounded-md text-center">
+                      <div className="text-xl sm:text-2xl font-bold text-indigo-600">{stat.value}</div>
+                      <div className="text-sm text-gray-500">{stat.label}</div>
                   </div>
-                  <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{userRooms.length}</div>
-                    <div className="text-sm text-gray-500">Rooms Created</div>
-                  </div>
-                  <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{userStats.roomsJoined}</div>
-                    <div className="text-sm text-gray-500">Rooms Joined</div>
-                  </div>
-                  <div className="bg-slate-100 p-4 rounded-md text-center">
-                    <div className="text-2xl font-bold text-indigo-600">{userStats.correctAnswers}</div>
-                    <div className="text-sm text-gray-500">Correct Answers</div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
+              {/* User Quiz Rooms Section */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">Your Quiz Rooms</h3>
+                  <h3 className="text-lg sm:text-xl font-bold">Your Quiz Rooms</h3>
                   <Link href="/profile" className="text-indigo-600 hover:underline text-sm">
                     View All
                   </Link>
                 </div>
                 
                 {isLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                  <div className="flex justify-center py-6">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
                   </div>
                 ) : userRooms.length > 0 ? (
                   <div className="space-y-4">
                     {userRooms.slice(0, 3).map((room) => (
-                      <div key={room.id} className="border rounded-md p-4 hover:bg-slate-50">
-                        <Link href={`/rooms/${room.id}`} className="block">
+                      <Link key={room.id} href={`/rooms/${room.id}`} className="block border rounded-md p-4 hover:bg-slate-50">
                           <h4 className="font-medium">{room.name}</h4>
                           <div className="flex justify-between mt-2 text-sm text-gray-500">
                             <span>Topic: {room.topic}</span>
                             <span>{room.participantCount} participants</span>
                           </div>
-                          <div className="mt-1 text-xs text-gray-400">
-                            Created {new Date(room.createdAt).toLocaleDateString()}
-                          </div>
                         </Link>
-                      </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 py-4 text-center">
-                    You haven't created any quiz rooms yet.
-                  </p>
+                  <p className="text-gray-500 text-center">You haven’t created any quiz rooms yet.</p>
                 )}
               </div>
             </div>
 
+            {/* Active Quiz Rooms Section */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Active Quiz Rooms</h3>
+                <h3 className="text-lg sm:text-xl font-bold">Active Quiz Rooms</h3>
                 <Link href="/leaderboard" className="text-indigo-600 hover:underline text-sm">
                   Global Leaderboard
                 </Link>
               </div>
               
               {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                <div className="flex justify-center py-6">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500"></div>
                 </div>
               ) : activeRooms.length > 0 ? (
                 <div className="space-y-4">
                   {activeRooms.map((room) => (
-                    <div key={room.id} className="border rounded-md p-4 hover:bg-slate-50">
-                      <Link href={`/rooms/${room.id}`} className="block">
+                    <Link key={room.id} href={`/rooms/${room.id}`} className="block border rounded-md p-4 hover:bg-slate-50">
                         <h4 className="font-medium">{room.name}</h4>
-                        <div className="flex justify-between mt-2 text-sm text-gray-500">
-                          <span>Topic: {room.topic}</span>
-                          <span>{room.participantCount} participants</span>
-                        </div>
-                        <div className="mt-1 text-xs text-gray-400">
-                          By {room.creatorName}
-                        </div>
+                      <div className="text-sm text-gray-500">{room.topic} · {room.participantCount} participants</div>
                       </Link>
-                    </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 py-4 text-center">
-                  No active quiz rooms available. Why not create one?
-                </p>
+                <p className="text-gray-500 text-center">No active quiz rooms available.</p>
               )}
             </div>
           </div>

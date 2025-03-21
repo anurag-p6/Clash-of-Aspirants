@@ -90,9 +90,10 @@ export async function GET(req: NextRequest) {
 
 // POST: Create or update user
 export async function POST(req: NextRequest) {
+  let body: any;
+  
   try {
     // Parse JSON with error handling
-    let body;
     try {
       body = await req.json();
     } catch (parseError) {
@@ -152,18 +153,18 @@ export async function POST(req: NextRequest) {
       // Check which field caused the violation
       const field = error.meta?.target?.[0] || 'unknown field';
       
-      if (field === 'email') {
+      if (field === 'email' && body?.firebaseUid && body?.username) {
         // Try updating the user by firebaseUid instead
         try {
           const existingUserByFirebase = await prisma.user.findUnique({
-            where: { firebaseUid }
+            where: { firebaseUid: body.firebaseUid }
           });
           
           if (existingUserByFirebase) {
             // Update the user
             const updatedUser = await prisma.user.update({
               where: { id: existingUserByFirebase.id },
-              data: { username }
+              data: { username: body.username }
             });
             
             return NextResponse.json({ user: updatedUser });

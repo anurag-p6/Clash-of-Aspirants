@@ -12,11 +12,13 @@ export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && user) {
-      router.push('/dashboard');
+  const handleRoomAction = (action: 'create' | 'join') => {
+    if (user) {
+      router.push(`/rooms/${action}`);
+    } else {
+      router.push('/auth/login');
     }
-  }, [user, loading, router]);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -36,22 +38,14 @@ export default function HomePage() {
               Clash of Aspirants is an interactive quiz platform that leverages AI to generate dynamic quiz questions.
               Create or join quiz rooms, compete in real-time, and track your performance on leaderboards.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               {!loading && !user ? (
-                <>
-                  <Link
-                    href="/auth/register"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-md text-lg font-medium"
-                  >
-                    Sign Up Free
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="bg-white hover:bg-gray-100 text-indigo-900 px-8 py-4 rounded-md text-lg font-medium"
-                  >
-                    Learn More
-                  </Link>
-                </>
+                <Link
+                  href="/auth/register"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+                >
+                  Sign Up
+                </Link>
               ) : !loading && user ? (
                 <Link
                   href="/dashboard"
@@ -64,6 +58,21 @@ export default function HomePage() {
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
                 </div>
               )}
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => handleRoomAction('create')}
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+              >
+                Create Quiz Room
+              </button>
+              <button
+                onClick={() => handleRoomAction('join')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+              >
+                Join Quiz Room
+              </button>
             </div>
           </div>
 
