@@ -9,7 +9,7 @@ export interface QuizQuestion {
 
 // ✅ Initialize Gemini AI with API Key
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 /**
  * Generate mock questions for development without an API key
@@ -61,7 +61,7 @@ function generateMockQuestions(topic: string, numQuestions: number): QuizQuestio
  * Generate quiz questions using Gemini API
  */
 export async function generateQuizQuestions(topic: string, numQuestions: number = 5): Promise<QuizQuestion[]> {
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
     console.log("⚠️ No valid Gemini API key found. Using mock questions.");
     return generateMockQuestions(topic, numQuestions);
   }

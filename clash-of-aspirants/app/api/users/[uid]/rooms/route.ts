@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  params: {
-    uid: string;
-  };
+  uid: string;
 }
 
 // GET: Fetch rooms created by a user
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(req: NextRequest, context: { params: RouteParams }) {
   try {
-    const { uid } = params;
+    const { uid } = context.params;
 
     try {
       // First get the user's ID from the Firebase UID
@@ -54,7 +52,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       });
 
       // Format the rooms to match the expected structure in the client
-      const formattedRooms = rooms.map(room => ({
+      const formattedRooms = rooms.map((room:any) => ({
         id: room.id,
         name: room.name,
         topic: room.topic,
