@@ -86,4 +86,102 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// POST: Create or update user
+export async function POST(req: NextRequest) {
+  try {
+    // Parse JSON with error handling
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+    
+    const { firebaseUid, email, username } = body;
+
+    if (!firebaseUid || !email || !username) {
+      return NextResponse.json(
+        { error: 'Firebase UID, email, and username are required' },
+        { status: 400 }
+      );
+    }
+
+    // Try to find an existing user
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        firebaseUid: firebaseUid,
+      },
+    });
+
+    if (existingUser) {
+      // Update existing user
+      const updatedUser = await prisma.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          email,
+          username,
+        },
+      });
+
+      return NextResponse.json({ user: updatedUser });
+    } else {
+      // Create new user
+      const newUser = await prisma.user.create({
+        data: {
+          firebaseUid,
+          email,
+          username,
+        },
+      });
+
+      return NextResponse.json({ user: newUser });
+    }
+  } catch (error: any) {
+    console.error('Error creating/updating user:', error);
+    
+    // Handle unique constraint violations
+    if (error.code === 'P2002') {
+      // Check which field caused the violation
+      const field = error.meta?.target?.[0] || 'unknown field';
+      
+      if (field === 'email') {
+        // Try updating the user by firebaseUid instead
+        try {
+          const existingUserByFirebase = await prisma.user.findUnique({
+            where: { firebaseUid }
+          });
+          
+          if (existingUserByFirebase) {
+            // Update the user
+            const updatedUser = await prisma.user.update({
+              where: { id: existingUserByFirebase.id },
+              data: { username }
+            });
+            
+            return NextResponse.json({ user: updatedUser });
+          }
+        } catch (updateError) {
+          console.error('Error updating user after constraint violation:', updateError);
+        }
+      }
+      
+      return NextResponse.json(
+        { error: `A user with this ${field} already exists` },
+        { status: 409 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: `Failed to create/update user: ${error.message}` },
+      { status: 500 }
+    );
+  }
 } 

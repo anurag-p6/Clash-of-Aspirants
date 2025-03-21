@@ -22,6 +22,27 @@ model User {
   participatedRooms RoomParticipant[]
   answers           Answer[]
 }
+// newly added which might be deleted
+// Added new models for quiz templates
+model QuizTemplate {
+  id          String                 @id @default(uuid())
+  topic       String
+  createdAt   DateTime               @default(now())
+  questions   QuizTemplateQuestion[]
+}
+
+model QuizTemplateQuestion {
+  id           String        @id @default(uuid())
+  templateId   String
+  template     QuizTemplate  @relation(fields: [templateId], references: [id])
+  content      String
+  options      Json
+  correctOption Int
+  explanation  String?
+  createdAt    DateTime      @default(now())
+  
+  @@index([templateId])
+}
 
 model QuizRoom {
   id            String            @id @default(uuid())

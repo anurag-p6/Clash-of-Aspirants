@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateQuizQuestions } from '@/lib/openai';
+import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
 
 // GET: Fetch all active quiz rooms
 export async function GET(req: NextRequest) {
@@ -74,8 +75,8 @@ export async function GET(req: NextRequest) {
         }
       ];
       
-      console.log('Returning mock rooms data for development');
-      return NextResponse.json({ rooms: mockRooms });
+      // console.log('Returning mock rooms data for development');
+      // return NextResponse.json({ rooms: mockRooms });
     }
   } catch (error) {
     console.error('Error fetching rooms:', error);
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const { name, topic, creatorId } = body;
+    const { name, topic, creatorId, numQuestions = 5 } = body;
 
     if (!name || !topic || !creatorId) {
       return NextResponse.json(
@@ -128,44 +129,67 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Generate questions using OpenAI
-      const aiQuestions = await generateQuizQuestions(topic, 5); // Assuming 5 questions for simplicity
-
-      // Store generated questions in the database
-      for (const question of aiQuestions) {
-        await prisma.question.create({
-          data: {
-            roomId: room.id,
-            content: question.question,
-            options: question.options,
-            correctOption: question.correctOptionIndex,
-            explanation: question.explanation,
-          },
-        });
+      console.log("Room and participant created successfully, attempting to create template...");
+      
+      // Find or generate a quiz template for this topic
+      const template = await generateAndStoreQuizTemplate(topic, numQuestions);
+      
+      console.log("Template created/found:", template.id, "with", template.questions.length, "questions");
+      
+      // Get questions from the template
+      let templateQuestions = template.questions;
+      
+      // If we need more questions than we have in the template, limit to what we have
+      const questionsToUse = templateQuestions.slice(0, numQuestions);
+      
+      console.log("Using", questionsToUse.length, "questions from template");
+      
+      // Create questions for the room based on template questions
+      try {
+        await Promise.all(
+          questionsToUse.map(async (q: TemplateQuestion) => {
+            console.log("Creating question:", q.id);
+            
+            // Ensure options is properly formatted for database
+            let processedOptions;
+            try {
+              // Make sure options is properly serialized
+              processedOptions = typeof q.options === 'string' 
+                ? JSON.parse(q.options) 
+                : q.options;
+            } catch (e) {
+              console.error("Error processing options:", e);
+              processedOptions = ["Option A", "Option B", "Option C", "Option D"];
+            }
+            
+            return prisma.question.create({
+              data: {
+                roomId: room.id,
+                content: q.content,
+                options: processedOptions,
+                correctOption: q.correctOption,
+                explanation: q.explanation,
+              },
+            });
+          })
+        );
+      } catch (questionError: any) {
+        console.error("Error creating questions:", questionError);
+        throw new Error(`Failed to create questions: ${questionError.message}`);
       }
 
       return NextResponse.json({ room });
-    } catch (dbError) {
-      console.error('Database error creating room:', dbError);
-      
-      // Create mock room data for development
-      const mockRoom = {
-        id: `mock-room-${Date.now()}`,
-        name,
-        topic,
-        creatorId,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      console.log('Returning mock room data for development:', mockRoom);
-      return NextResponse.json({ room: mockRoom });
+    } catch (error: any) {
+      console.error('Error creating room:', error);
+      return NextResponse.json(
+        { error: `Failed to create room: ${error.message}` },
+        { status: 500 }
+      );
     }
   } catch (error) {
-    console.error('Error creating room:', error);
+    console.error('Error processing request:', error);
     return NextResponse.json(
-      { error: 'Failed to create room' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

@@ -50,6 +50,7 @@ export default function CreateRoomPage() {
           name,
           topic,
           creatorId: user?.id,
+          numQuestions
         }),
       });
 
@@ -67,24 +68,6 @@ export default function CreateRoomPage() {
       }
 
       const roomId = roomData.room.id;
-
-      // Generate questions for the room
-      const questionsResponse = await fetch('/api/questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          topic,
-          numQuestions,
-          roomId,
-        }),
-      });
-
-      if (!questionsResponse.ok) {
-        const errorData = await questionsResponse.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Failed to generate questions');
-      }
 
       // Set the created room to show sharing options
       setCreatedRoom({

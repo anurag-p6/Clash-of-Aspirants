@@ -1,0 +1,145 @@
+import { prisma } from "@/lib/prisma";
+import { generateQuizQuestions, QuizQuestion } from "@/lib/openai";
+
+/**
+ * Create a new quiz template in the database
+ */
+export async function createQuizTemplate(topic: string, questions: QuizQuestion[]) {
+  try {
+    // Validate that we have valid questions before proceeding
+    if (!Array.isArray(questions) || questions.length === 0) {
+      throw new Error(`No valid questions provided for topic: ${topic}`);
+    }
+
+    console.log(`Creating template for topic "${topic}" with ${questions.length} questions`);
+    
+    // Validate each question has the required properties
+    questions.forEach((q, index) => {
+      if (!q.question || !Array.isArray(q.options) || q.options.length < 2 || 
+          typeof q.correctOptionIndex !== 'number') {
+        console.error(`Invalid question at index ${index}:`, q);
+        throw new Error(`Question ${index + 1} has invalid format`);
+      }
+    });
+    
+    const template = await prisma.quizTemplate.create({
+      data: {
+        topic,
+        questions: {
+          create: questions.map(q => {
+            // Ensure JSON is properly handled
+            let options;
+            try {
+              // If options is already an array, this will work
+              options = Array.isArray(q.options) ? q.options : JSON.parse(JSON.stringify(q.options));
+            } catch (e) {
+              console.error("Error processing options for question:", e);
+              options = ["Option A", "Option B", "Option C", "Option D"];
+            }
+            
+            return {
+              content: q.question,
+              options: options,
+              correctOption: q.correctOptionIndex,
+              explanation: q.explanation || "This is the correct answer",
+            };
+          })
+        }
+      },
+      include: {
+        questions: true
+      }
+    });
+    
+    return template;
+  } catch (error: any) {
+    console.error("Error creating quiz template:", error);
+    throw error;
+  }
+}
+
+/**
+ * Generate and store a new quiz template
+ */
+export async function generateAndStoreQuizTemplate(topic: string, numQuestions: number = 5) {
+  try {
+    // Check if a template for this topic already exists
+    const existingTemplate = await prisma.quizTemplate.findFirst({
+      where: {
+        topic: {
+          equals: topic,
+          mode: "insensitive"
+        }
+      },
+      include: {
+        questions: true
+      }
+    });
+    
+    // If template exists and has enough questions, return it
+    if (existingTemplate && existingTemplate.questions.length >= numQuestions) {
+      return existingTemplate;
+    }
+    
+    // Generate new questions using AI
+    const questions = await generateQuizQuestions(topic, numQuestions);
+    
+    // Create a new template
+    const template = await createQuizTemplate(topic, questions);
+    
+    return template;
+  } catch (error) {
+    console.error("Error generating quiz template:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get quiz template by ID
+ */
+export async function getQuizTemplate(templateId: string) {
+  return prisma.quizTemplate.findUnique({
+    where: { id: templateId },
+    include: { questions: true }
+  });
+}
+
+/**
+ * Find quiz template by topic
+ */
+export async function findQuizTemplateByTopic(topic: string) {
+  return prisma.quizTemplate.findFirst({
+    where: {
+      topic: {
+        equals: topic,
+        mode: "insensitive"
+      }
+    },
+    include: { questions: true }
+  });
+}
+
+/**
+ * List all quiz templates
+ */
+export async function listQuizTemplates() {
+  return prisma.quizTemplate.findMany({
+    include: {
+      _count: {
+        select: { questions: true }
+      }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+}
+
+// Template question type for use in other files
+export interface TemplateQuestion {
+  id: string;
+  templateId: string;
+  content: string;
+  options: any;
+  correctOption: number;
+  explanation: string | null;
+  createdAt: Date;
+} 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateQuizQuestions } from '@/lib/openai';
 import { prisma } from '@/lib/prisma';
+import { generateAndStoreQuizTemplate, findQuizTemplateByTopic, TemplateQuestion } from '@/lib/templates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,19 +33,49 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate questions using OpenAI
-    const aiQuestions = await generateQuizQuestions(topic, numQuestions);
+    // First check if the room exists
+    const room = await prisma.quizRoom.findUnique({
+      where: { id: roomId }
+    });
+
+    if (!room) {
+      return NextResponse.json(
+        { error: 'Room not found' },
+        { status: 404 }
+      );
+    }
 
     try {
-      // Store questions in the database
+      // Find or create a template for this topic
+      const template = await generateAndStoreQuizTemplate(topic, numQuestions);
+      
+      // Get the questions from the template
+      let templateQuestions = template.questions;
+      
+      // If we need more questions than we have in the template, limit to what we have
+      const questionsToUse = templateQuestions.slice(0, numQuestions);
+      
+      // Create questions in the room based on template questions
       const questions = await Promise.all(
-        aiQuestions.map(async (q) => {
+        questionsToUse.map(async (q: TemplateQuestion) => {
+          // Ensure options is properly formatted for database
+          let processedOptions;
+          try {
+            // Make sure options is properly serialized
+            processedOptions = typeof q.options === 'string' 
+              ? JSON.parse(q.options) 
+              : q.options;
+          } catch (e) {
+            console.error("Error processing options:", e);
+            processedOptions = ["Option A", "Option B", "Option C", "Option D"];
+          }
+          
           return prisma.question.create({
             data: {
               roomId,
-              content: q.question,
-              options: q.options as any,
-              correctOption: q.correctOptionIndex,
+              content: q.content,
+              options: processedOptions,
+              correctOption: q.correctOption,
               explanation: q.explanation,
             },
           });
@@ -54,6 +85,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ questions });
     } catch (dbError) {
       console.error('Database error storing questions:', dbError);
+      
+      // Fall back to generating questions directly without storing in database
+      const aiQuestions = await generateQuizQuestions(topic, numQuestions);
       
       // Create mock question data with IDs
       const mockQuestions = aiQuestions.map((q, index) => ({

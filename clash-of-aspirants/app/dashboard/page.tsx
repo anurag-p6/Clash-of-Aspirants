@@ -37,6 +37,8 @@ export default function DashboardPage() {
       }
       
       try {
+        setIsLoading(true);
+        
         // Fetch active rooms
         const roomsResponse = await fetch('/api/rooms');
         
@@ -45,50 +47,37 @@ export default function DashboardPage() {
           roomsData = await roomsResponse.json();
           if (roomsData.rooms) {
             setActiveRooms(roomsData.rooms);
+          } else {
+            setActiveRooms([]);
           }
         } catch (jsonError) {
           console.error('Error parsing rooms response:', jsonError);
-          // Set empty rooms array as fallback
           setActiveRooms([]);
         }
         
-        // Make sure user.id exists before making the request
+        // Fetch user's rooms
         try {
-          // Try to get user rooms from the API
-          if (user.id) {
-            // Attempt to fetch user rooms, ignoring 404 errors
-            const userRoomsResponse = await fetch(`/api/users/${user.id}/rooms`, {
-              // This prevents the fetch from failing on 404
-              cache: 'no-store' 
-            });
-            
-            if (userRoomsResponse.ok) {
-              const userRoomsData = await userRoomsResponse.json();
-              if (userRoomsData.rooms) {
-                setUserRooms(userRoomsData.rooms);
-              }
+          const userRoomsResponse = await fetch(`/api/users/${user.id}/rooms`);
+          
+          if (userRoomsResponse.ok) {
+            const userRoomsData = await userRoomsResponse.json();
+            if (userRoomsData.rooms) {
+              setUserRooms(userRoomsData.rooms);
             } else {
-              console.log(`User rooms endpoint failed with status: ${userRoomsResponse.status}, using mock data`);
-              // Use mock data if the endpoint fails
-              const mockUserRooms = generateMockUserRooms();
-              setUserRooms(mockUserRooms);
+              setUserRooms([]);
             }
           } else {
-            console.log('User ID not available, using mock data');
-            const mockUserRooms = generateMockUserRooms();
-            setUserRooms(mockUserRooms);
+            console.error(`Failed to fetch user rooms: ${userRoomsResponse.status}`);
+            setUserRooms([]);
           }
         } catch (error) {
           console.error('Error fetching user rooms:', error);
-          // Generate mock rooms data as fallback
-          const mockUserRooms = generateMockUserRooms();
-          setUserRooms(mockUserRooms);
+          setUserRooms([]);
         }
         
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching rooms:', error);
-        // Set empty arrays as fallback
         setActiveRooms([]);
         setUserRooms([]);
         setIsLoading(false);
@@ -99,28 +88,6 @@ export default function DashboardPage() {
       fetchRooms();
     }
   }, [user]);
-
-  // Generate mock user rooms data for development
-  const generateMockUserRooms = (): QuizRoom[] => {
-    return [
-      {
-        id: `mock-room-1-${Date.now()}`,
-        name: "History Quiz",
-        topic: "History",
-        participantCount: 4,
-        createdAt: new Date().toISOString(),
-        creatorName: user?.username || "You"
-      },
-      {
-        id: `mock-room-2-${Date.now()}`,
-        name: "Science Quiz", 
-        topic: "Science",
-        participantCount: 2,
-        createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        creatorName: user?.username || "You"
-      }
-    ];
-  };
 
   return (
     <div className="flex flex-col min-h-screen">

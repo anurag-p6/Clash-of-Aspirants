@@ -63,6 +63,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             score: 0
           };
 
+          // Create or update user in the database
+          try {
+            const createUserResponse = await fetch('/api/users', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                firebaseUid: authUser.uid,
+                email: authUser.email || 'unknown@example.com',
+                username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+              }),
+            });
+
+            if (createUserResponse.ok) {
+              const userData = await createUserResponse.json();
+              if (userData.user && userData.user.id) {
+                console.log('User created/updated in database:', userData.user);
+                setUser(userData.user);
+                setLoading(false);
+                return;
+              } else {
+                console.log('User API returned success but with invalid data format, trying fallback endpoints');
+              }
+            } else {
+              console.log('Failed to create/update user in database, status:', createUserResponse.status);
+              // Try one more time with different parameters
+              try {
+                const retryResponse = await fetch('/api/users', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    firebaseUid: authUser.uid,
+                    email: authUser.email || `user-${authUser.uid.substring(0, 5)}@example.com`,
+                    username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+                  }),
+                });
+                
+                if (retryResponse.ok) {
+                  const retryData = await retryResponse.json();
+                  if (retryData.user && retryData.user.id) {
+                    console.log('User created/updated on retry:', retryData.user);
+                    setUser(retryData.user);
+                    setLoading(false);
+                    return;
+                  }
+                }
+              } catch (retryError) {
+                console.error('Error on retry of user creation:', retryError);
+              }
+              console.log('Failed to create/update user after retry, trying fallback endpoints');
+            }
+          } catch (createError) {
+            console.error('Error creating/updating user in database:', createError);
+          }
+
           // Try to fetch user data, with multiple fallbacks
           try {
             // First try direct endpoint with cache control to prevent 404 errors breaking the app
@@ -123,40 +177,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (authUser) {
         try {
-          // Check if user exists in your database
-          const checkResponse = await fetch(`/api/users/${authUser.uid}`);
-        
-          if (!checkResponse.ok) {
-            try {
-              // User doesn't exist, register them
-              const registerResponse = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  firebaseUid: authUser.uid,
-                  email: authUser.email,
-                  username: authUser.displayName || `user${Math.floor(Math.random() * 10000)}`,
-                }),
-              });
+          // Create or update user in our database
+          const registerResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firebaseUid: authUser.uid,
+              email: authUser.email || 'unknown@example.com',
+              username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+            }),
+          });
 
-              if (registerResponse.ok) {
-                const userData = await registerResponse.json();
-                setUser(userData.user);
-              }
-            } catch (registerError) {
-              console.error('Error registering user:', registerError);
-              // Create temporary user if API fails
-              setUser({
-                id: authUser.uid,
-                firebaseUid: authUser.uid,
-                email: authUser.email || 'unknown@example.com',
-                username: authUser.displayName || `user-${authUser.uid.substring(0, 5)}`
-              });
-            }
-          } else {
-            // User exists, set user data
-            const userData = await checkResponse.json();
+          if (registerResponse.ok) {
+            const userData = await registerResponse.json();
             setUser(userData.user);
+          } else {
+            console.error('Failed to register user in database');
+            // Create temporary user
+            setUser({
+              id: authUser.uid,
+              firebaseUid: authUser.uid,
+              email: authUser.email || 'unknown@example.com',
+              username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              score: 0
+            });
           }
         } catch (apiError) {
           console.error('API error during sign in:', apiError);
@@ -165,7 +211,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             id: authUser.uid,
             firebaseUid: authUser.uid,
             email: authUser.email || 'unknown@example.com',
-            username: authUser.displayName || `user-${authUser.uid.substring(0, 5)}`
+            username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            score: 0
           });
         }
       }
@@ -184,12 +233,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authUser) {
         try {
           // Register user in your database
-          const response = await fetch('/api/auth/register', {
+          const response = await fetch('/api/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               firebaseUid: authUser.uid,
-              email: authUser.email,
+              email: authUser.email || email,
               username,
             }),
           });
@@ -204,7 +253,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               id: authUser.uid,
               firebaseUid: authUser.uid,
               email: authUser.email || email,
-              username
+              username,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              score: 0
             });
           }
         } catch (apiError) {
@@ -214,7 +266,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             id: authUser.uid,
             firebaseUid: authUser.uid,
             email: authUser.email || email,
-            username
+            username,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            score: 0
           });
         }
       }
@@ -230,21 +285,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await signInWithEmailAndPassword(auth, email, password);
       const { user: authUser } = result;
       
-      // Manually check the user instead of relying on auth state change listener
+      // Create or update user in the database
       if (authUser) {
         try {
-          const response = await fetch(`/api/users/${authUser.uid}`);
-          if (response.ok) {
-            const userData = await response.json();
+          // Create or update user in our database
+          const registerResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firebaseUid: authUser.uid,
+              email: authUser.email || email,
+              username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+            }),
+          });
+
+          if (registerResponse.ok) {
+            const userData = await registerResponse.json();
             setUser(userData.user);
           } else {
-            // If we can't get the user, create a temporary one
-            console.log('API returned error, creating temporary user');
+            console.error('Failed to update user in database during signin');
+            // Create temporary user
             setUser({
               id: authUser.uid,
               firebaseUid: authUser.uid,
               email: authUser.email || email,
-              username: authUser.displayName || `user-${authUser.uid.substring(0, 5)}`
+              username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              score: 0
             });
           }
         } catch (apiError) {
@@ -254,7 +322,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             id: authUser.uid,
             firebaseUid: authUser.uid,
             email: authUser.email || email,
-            username: authUser.displayName || `user-${authUser.uid.substring(0, 5)}`
+            username: authUser.displayName || `User-${authUser.uid.substring(0, 5)}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            score: 0
           });
         }
       }

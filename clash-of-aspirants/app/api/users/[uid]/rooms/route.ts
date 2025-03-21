@@ -2,36 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  uid: string;
+  params: {
+    uid: string;
+  };
 }
 
 // GET: Fetch rooms created by a user
-export async function GET(req: NextRequest, context: { params: RouteParams }) {
+export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
-    const { uid } = context.params;
+    const { uid } = params;
+
+    if (!uid) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
 
     try {
-      // First get the user's ID from the Firebase UID
-      const user = await prisma.user.findUnique({
-        where: {
-          firebaseUid: uid,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      if (!user) {
-        return NextResponse.json(
-          { error: 'User not found' },
-          { status: 404 }
-        );
-      }
-
-      // Then get the rooms created by this user
+      // Get the rooms created by this user
       const rooms = await prisma.quizRoom.findMany({
         where: {
-          creatorId: user.id,
+          creatorId: uid,
         },
         include: {
           creator: {
@@ -52,7 +44,7 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
       });
 
       // Format the rooms to match the expected structure in the client
-      const formattedRooms = rooms.map((room:any) => ({
+      const formattedRooms = rooms.map((room) => ({
         id: room.id,
         name: room.name,
         topic: room.topic,
@@ -64,29 +56,10 @@ export async function GET(req: NextRequest, context: { params: RouteParams }) {
       return NextResponse.json({ rooms: formattedRooms });
     } catch (dbError) {
       console.error('Database error fetching user rooms:', dbError);
-      
-      // Create mock rooms data for development
-      const mockRooms = [
-        {
-          id: `mock-room-1-${Date.now()}`,
-          name: "Mock History Quiz",
-          topic: "History",
-          participantCount: 4,
-          createdAt: new Date().toISOString(),
-          creatorName: `User-${uid.substring(0, 5)}`,
-        },
-        {
-          id: `mock-room-2-${Date.now()}`,
-          name: "Mock Science Quiz", 
-          topic: "Science",
-          participantCount: 2,
-          createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          creatorName: `User-${uid.substring(0, 5)}`,
-        }
-      ];
-      
-      console.log('Returning mock rooms data for development:', mockRooms.length, 'rooms');
-      return NextResponse.json({ rooms: mockRooms });
+      return NextResponse.json(
+        { error: 'Database error fetching user rooms' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error fetching user rooms:', error);
