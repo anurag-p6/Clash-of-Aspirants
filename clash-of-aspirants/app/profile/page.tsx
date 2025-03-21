@@ -60,8 +60,21 @@ export default function ProfilePage() {
         const response = await fetch(`/api/users/${user.id}/stats`);
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          throw new Error(errorData.error || `Error fetching stats: ${response.status}`);
+          // Try to safely get the response text instead of assuming it's JSON
+          const responseText = await response.text();
+          let errorMessage;
+          
+          try {
+            // Try to parse as JSON
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || `Error fetching stats: ${response.status}`;
+          } catch (parseError) {
+            // If not JSON, use status code
+            console.error('Failed to parse error response:', responseText);
+            errorMessage = `Error fetching stats: ${response.status}`;
+          }
+          
+          throw new Error(errorMessage);
         }
         
         const data = await response.json();
@@ -73,6 +86,17 @@ export default function ProfilePage() {
       } catch (error: any) {
         console.error('Error fetching user stats:', error);
         setError(error.message || 'Failed to load user statistics');
+        
+        // Set default stats as fallback
+        setUserStats({
+          totalScore: 0,
+          quizzesCreated: 0,
+          quizzesJoined: 0,
+          correctAnswers: 0,
+          incorrectAnswers: 0,
+          totalAnswers: 0,
+          accuracy: 0
+        });
       } finally {
         setIsLoading(false);
       }
