@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQuizTemplate } from '@/lib/templates';
+import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type RouteContext = {
   params: {
     id: string;
   };
-}
+};
 
 // GET: Fetch a specific template by ID
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     const template = await getQuizTemplate(id);
     

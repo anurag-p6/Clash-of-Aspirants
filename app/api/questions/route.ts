@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateQuizQuestions } from '@/lib/openai';
 import { prisma } from '@/lib/prisma';
-import { generateAndStoreQuizTemplate, findQuizTemplateByTopic, TemplateQuestion } from '@/lib/templates';
+import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       const template = await generateAndStoreQuizTemplate(topic, numQuestions);
       
       // Get the questions from the template
-      let templateQuestions = template.questions;
+      const templateQuestions = template.questions;
       
       // If we need more questions than we have in the template, limit to what we have
       const questionsToUse = templateQuestions.slice(0, numQuestions);

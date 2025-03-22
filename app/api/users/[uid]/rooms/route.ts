@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type RouteContext = {
   params: {
     uid: string;
   };
-}
+};
 
 // GET: Fetch rooms created by a user
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { uid } = params;
+    const { uid } = context.params;
 
     if (!uid) {
       return NextResponse.json(
@@ -61,10 +64,36 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     } catch (dbError) {
       console.error('Database error fetching user rooms:', dbError);
       console.error('Error details:', JSON.stringify(dbError, null, 2));
-      return NextResponse.json(
-        { error: 'Database error fetching user rooms' },
-        { status: 500 }
-      );
+      
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Database error fetching user rooms' },
+          { status: 500 }
+        );
+      }
+      
+      // Return mock data only in development
+      const mockRooms = [
+        {
+          id: `mock-room-${uid}-1`,
+          name: 'Astronomy Quiz',
+          topic: 'Astronomy',
+          participantCount: 3,
+          createdAt: new Date().toISOString(),
+          creatorName: `User-${uid.substring(0, 5)}`
+        },
+        {
+          id: `mock-room-${uid}-2`,
+          name: 'Geography Quiz',
+          topic: 'Geography',
+          participantCount: 2,
+          createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+          creatorName: `User-${uid.substring(0, 5)}`
+        }
+      ];
+      
+      console.log('Returning mock user rooms data for development');
+      return NextResponse.json({ rooms: mockRooms });
     }
   } catch (error) {
     console.error('Error fetching user rooms:', error);

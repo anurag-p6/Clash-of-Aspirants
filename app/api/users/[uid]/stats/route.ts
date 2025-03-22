@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type RouteContext = {
   params: {
     uid: string;
   };
-}
+};
 
 // GET: Fetch statistics for a specific user
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { uid } = params;
+    const { uid } = context.params;
 
     if (!uid) {
       return NextResponse.json(
@@ -95,7 +98,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     } catch (dbError) {
       console.error('Database error fetching user stats:', dbError);
       
-      // Return mock data for development to prevent errors
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Database error fetching user statistics' },
+          { status: 500 }
+        );
+      }
+      
+      // Only use mock data in development
       const mockStats = {
         totalScore: 120,
         quizzesCreated: 5,

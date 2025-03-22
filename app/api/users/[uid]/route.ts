@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type RouteContext = {
   params: {
     uid: string;
   };
-}
+};
 
 // GET: Fetch a user by Firebase UID
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(
+  req: NextRequest, 
+  context: RouteContext
+) {
   try {
-    const { uid } = params;
+    const { uid } = context.params;
 
     try {
       const user = await prisma.user.findUnique({
@@ -29,6 +32,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ user });
     } catch (dbError) {
       console.error('Database error:', dbError);
+      
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Database error fetching user' },
+          { status: 500 }
+        );
+      }
       
       // Create a dummy user for development when DB isn't available
       const dummyUser = {

@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type RouteContext = {
   params: {
     id: string;
   };
-}
+};
 
 // GET: Fetch all questions for a specific room
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     try {
       // Check if the room exists and is active
@@ -49,6 +52,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     } catch (dbError) {
       // Database error - return mock data for development
       console.error('Database error fetching questions:', dbError);
+      
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Database error fetching questions' },
+          { status: 500 }
+        );
+      }
+      
       console.log('Returning mock questions data for development');
       
       // Create mock questions data

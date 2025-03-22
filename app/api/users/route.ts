@@ -26,6 +26,13 @@ export async function GET(req: NextRequest) {
       } catch (dbError) {
         console.error('Database error finding user by Firebase UID:', dbError);
         
+        if (process.env.NODE_ENV === 'production') {
+          return NextResponse.json(
+            { error: 'Database error finding user' },
+            { status: 500 }
+          );
+        }
+        
         // Create a dummy user for development when DB isn't available
         const dummyUser = {
           id: firebaseUid,
@@ -53,6 +60,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ users });
     } catch (dbError) {
       console.error('Database error fetching all users:', dbError);
+      
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Database error fetching users' },
+          { status: 500 }
+        );
+      }
       
       // Create dummy users for development
       const dummyUsers = [
@@ -90,12 +104,18 @@ export async function GET(req: NextRequest) {
 
 // POST: Create or update user
 export async function POST(req: NextRequest) {
-  let body: any;
+  interface UserRequestBody {
+    firebaseUid: string;
+    email: string;
+    username: string;
+  }
+  
+  let body: UserRequestBody | null = null;
   
   try {
     // Parse JSON with error handling
     try {
-      body = await req.json();
+      body = await req.json() as UserRequestBody;
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
       return NextResponse.json(
@@ -145,13 +165,14 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({ user: newUser });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating/updating user:', error);
     
     // Handle unique constraint violations
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       // Check which field caused the violation
-      const field = error.meta?.target?.[0] || 'unknown field';
+      const prismaError = error as { meta?: { target?: string[] } };
+      const field = prismaError.meta?.target?.[0] || 'unknown field';
       
       if (field === 'email' && body?.firebaseUid && body?.username) {
         // Try updating the user by firebaseUid instead
@@ -181,7 +202,7 @@ export async function POST(req: NextRequest) {
     }
     
     return NextResponse.json(
-      { error: `Failed to create/update user: ${error.message}` },
+      { error: `Failed to create/update user: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }

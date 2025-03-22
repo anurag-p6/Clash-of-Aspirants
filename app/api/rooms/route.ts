@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateQuizQuestions } from '@/lib/openai';
 import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
 
 // GET: Fetch all active quiz rooms
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     try {
       const rooms = await prisma.quizRoom.findMany({
@@ -34,10 +33,10 @@ export async function GET(req: NextRequest) {
       console.log(rooms);
 
       // Format rooms to match the structure expected by the client
-      const formattedRooms = rooms.map((room:any) => ({
+      const formattedRooms = rooms.map((room) => ({
         id: room.id,
         name: room.name,
-        topic: room.topic,
+        topic: room.topic || 'General Quiz',
         participantCount: room._count.participants,
         createdAt: room.createdAt.toISOString(),
         creatorName: room.creator.username,
@@ -47,36 +46,45 @@ export async function GET(req: NextRequest) {
     } catch (dbError) {
       console.error('Database error fetching rooms:', dbError);
       
-      // Return mock data for development
-      const mockRooms = [
-        {
-          id: 'mock-room-1',
-          name: 'General Knowledge Quiz',
-          topic: 'General Knowledge',
-          participantCount: 3,
-          createdAt: new Date().toISOString(),
-          creatorName: 'MockUser1'
-        },
-        {
-          id: 'mock-room-2',
-          name: 'Science Quiz',
-          topic: 'Science',
-          participantCount: 2,
-          createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-          creatorName: 'MockUser2'
-        },
-        {
-          id: 'mock-room-3',
-          name: 'History Quiz',
-          topic: 'History',
-          participantCount: 5,
-          createdAt: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-          creatorName: 'MockUser3'
-        }
-      ];
+      console.log('Database error fetching rooms, returning mock data for development');
       
-      // console.log('Returning mock rooms data for development');
-      // return NextResponse.json({ rooms: mockRooms });
+      // Mock rooms for development
+      if (process.env.NODE_ENV === 'development') {
+        const rooms = [
+          {
+            id: 'mock-room-1',
+            name: 'General Knowledge Quiz',
+            topic: 'General Knowledge',
+            participantCount: 3,
+            createdAt: new Date().toISOString(),
+            creatorName: 'MockUser1'
+          },
+          {
+            id: 'mock-room-2',
+            name: 'Science Quiz',
+            topic: 'Science',
+            participantCount: 2,
+            createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+            creatorName: 'MockUser2'
+          },
+          {
+            id: 'mock-room-3',
+            name: 'History Quiz',
+            topic: 'History',
+            participantCount: 5,
+            createdAt: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+            creatorName: 'MockUser3'
+          }
+        ];
+        
+        return NextResponse.json({ rooms });
+      }
+      
+      // In production, return an error
+      return NextResponse.json(
+        { error: 'Database error fetching rooms' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error fetching rooms:', error);
@@ -136,8 +144,10 @@ export async function POST(req: NextRequest) {
       
       console.log("Template created/found:", template.id, "with", template.questions.length, "questions");
       
-      // Get questions from the template
-      let templateQuestions = template.questions;
+      console.log(`Creating room with ${numQuestions} questions from template`);
+      
+      // Get the questions from the template
+      const templateQuestions = template.questions;
       
       // If we need more questions than we have in the template, limit to what we have
       const questionsToUse = templateQuestions.slice(0, numQuestions);
@@ -173,13 +183,16 @@ export async function POST(req: NextRequest) {
             });
           })
         );
-      } catch (questionError: any) {
-        console.error("Error creating questions:", questionError);
-        throw new Error(`Failed to create questions: ${questionError.message}`);
+      } catch (questionError: Error) {
+        console.error('Error generating questions:', questionError);
+        return NextResponse.json(
+          { error: 'Failed to generate questions' },
+          { status: 500 }
+        );
       }
 
       return NextResponse.json({ room });
-    } catch (error: any) {
+    } catch (error: Error) {
       console.error('Error creating room:', error);
       return NextResponse.json(
         { error: `Failed to create room: ${error.message}` },

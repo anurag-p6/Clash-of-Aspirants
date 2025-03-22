@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
+type RouteContext = {
   params: {
     id: string;
   };
-}
+};
 
 // GET: Fetch details for a specific room
-export async function GET(req: NextRequest, { params }: RouteParams) {
+export async function GET(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     try {
       const room = await prisma.quizRoom.findUnique({
@@ -46,6 +49,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     } catch (dbError) {
       // Database error - return mock data for development
       console.error('Database error fetching room:', dbError);
+      
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          { error: 'Database error fetching room' },
+          { status: 500 }
+        );
+      }
+      
       console.log('Returning mock room data for development');
       
       // Create mock room data
@@ -79,9 +90,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 // PUT: Update a room (e.g., to deactivate it)
-export async function PUT(req: NextRequest, { params }: RouteParams) {
+export async function PUT(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const { isActive } = await req.json();
 
     const updatedRoom = await prisma.quizRoom.update({
