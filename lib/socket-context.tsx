@@ -8,7 +8,6 @@ import {
   ReactNode,
 } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from './auth-context';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -30,7 +29,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const { user } = useAuth();
 
   useEffect(() => {
     let socketInstance: Socket | null = null;

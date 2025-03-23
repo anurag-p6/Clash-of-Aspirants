@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
 
 // GET: Fetch details for a specific room
 export async function GET(
-  req: NextRequest,
-  context: RouteContext
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params;
+    const id = (await context.params).id;
 
     try {
       const room = await prisma.quizRoom.findUnique({
@@ -92,10 +87,10 @@ export async function GET(
 // PUT: Update a room (e.g., to deactivate it)
 export async function PUT(
   req: NextRequest,
-  context: RouteContext
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params;
+    const id  = (await params).id;
     const { isActive } = await req.json();
 
     const updatedRoom = await prisma.quizRoom.update({

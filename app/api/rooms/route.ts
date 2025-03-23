@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
 
 // GET: Fetch all active quiz rooms
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     try {
       const rooms = await prisma.quizRoom.findMany({
@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
             });
           })
         );
-      } catch (questionError: Error) {
+      } catch (questionError) {
         console.error('Error generating questions:', questionError);
         return NextResponse.json(
           { error: 'Failed to generate questions' },
@@ -192,10 +192,10 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json({ room });
-    } catch (error: Error) {
+    } catch (error) {
       console.error('Error creating room:', error);
       return NextResponse.json(
-        { error: `Failed to create room: ${error.message}` },
+        { error: `Failed to create room: ${(error as Error).message}` },
         { status: 500 }
       );
     }

@@ -52,8 +52,8 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
     });
     
     return template;
-  } catch (error: any) {
-    console.error("Error creating quiz template:", error);
+  } catch (error) {
+    console.error("Error creating quiz template:", error as Error);
     throw error;
   }
 }

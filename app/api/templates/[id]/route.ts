@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQuizTemplate } from '@/lib/templates';
-import { prisma } from '@/lib/prisma';
-
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
 
 // GET: Fetch a specific template by ID
 export async function GET(
-  req: NextRequest,
-  context: RouteContext
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params;
+    const id = (await context.params).id;
 
     const template = await getQuizTemplate(id);
     
@@ -27,7 +20,7 @@ export async function GET(
     
     return NextResponse.json({ template });
   } catch (error) {
-    console.error('Error fetching template:', error);
+    console.error('Error fetching template:', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch template' },
       { status: 500 }

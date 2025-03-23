@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff } from "lucide-react";
 import { BearAnimation } from '@/components/animation/bear';
+import Image from 'next/image';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -43,9 +44,9 @@ export default function RegisterPage() {
     try {
       await signUpWithEmail(email, password, username);
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
-      setError(error.message || 'Failed to register. Please try again.');
+      setError((error as Error).message || 'Failed to register. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -58,9 +59,9 @@ export default function RegisterPage() {
     try {
       await signInWithGoogle();
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Google sign up error:', error);
-      setError(error.message || 'Failed to sign up with Google. Please try again.');
+      setError((error as Error).message || 'Failed to sign up with Google. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -158,19 +159,19 @@ export default function RegisterPage() {
             {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
-
         <div className="mt-4 flex items-center justify-center">
-          <span className="w-full border-t border-gray-300"></span>
-          <span className="px-3 text-gray-500">Or continue with</span>
-          <span className="w-full border-t border-gray-300"></span>
+          <span className="flex-grow border-t border-gray-300"></span>
+          <span className="px-3 text-gray-500 whitespace-nowrap">Or continue with</span>
+          <span className="flex-grow border-t border-gray-300"></span>
         </div>
+
 
         <button
           onClick={handleGoogleSignUp}
           disabled={isLoading}
           className="mt-4 w-full flex justify-center items-center gap-3 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
         >
-          <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
+          <Image src="/google-icon.svg" alt="Google" width={20} height={20} />
           Google
         </button>
 

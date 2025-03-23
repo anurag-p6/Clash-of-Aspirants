@@ -31,7 +31,7 @@ export const initSocketServer = (server?: NetServer) => {
       });
 
       // Handle submitting an answer
-      socket.on('submit-answer', ({ roomId, userId, questionId, answer, isCorrect }) => {
+      socket.on('submit-answer', ({ roomId, userId, questionId, isCorrect }) => {
         // Broadcast to the room that a user has submitted an answer
         io?.to(roomId).emit('user-answered', { userId, questionId, isCorrect });
       });
@@ -62,7 +62,3 @@ export const initSocketServer = (server?: NetServer) => {
 };
 
 // For CommonJS compatibility in server.js
-module.exports = {
-  getIO,
-  initSocketServer
-}; 

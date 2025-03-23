@@ -82,9 +82,9 @@ export default function CreateRoomPage() {
         name: name
       });
       
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating room:', error);
-      setError(error.message || 'Failed to create room. Please try again.');
+      setError((error as Error).message || 'Failed to create room. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +144,7 @@ export default function CreateRoomPage() {
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">Room Created Successfully!</h2>
                   <p className="text-gray-600 mb-6">
-                    Your quiz room "{createdRoom.name}" is ready. Share the code with others to join.
+                    Your quiz room &quot{createdRoom.name}&quot is ready. Share the code with others to join.
                   </p>
                   
                   <div className="bg-indigo-50 rounded-lg p-4 mb-6 max-w-md mx-auto">

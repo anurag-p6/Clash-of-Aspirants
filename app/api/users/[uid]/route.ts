@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-type RouteContext = {
-  params: {
-    uid: string;
-  };
-};
 
 // GET: Fetch a user by Firebase UID
 export async function GET(
   req: NextRequest, 
-  context: RouteContext
+  context: { params: Promise<{ uid: string }> }
 ) {
   try {
-    const { uid } = context.params;
+    const { uid } = await context.params;
 
     try {
       const user = await prisma.user.findUnique({

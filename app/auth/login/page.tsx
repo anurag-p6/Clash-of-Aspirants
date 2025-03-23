@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff } from 'lucide-react';
 import Loader from '@/components/ui/loader';
 import { BearAnimation } from '@/components/animation/bear';
-
+import Image from 'next/image';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,9 +31,9 @@ export default function LoginPage() {
     try {
       await signInWithEmail(email, password);
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || 'Invalid credentials. Please try again.');
+      setError((error as Error).message || 'Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -46,9 +46,9 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Google login error:', error);
-      setError(error.message || 'Google sign-in failed. Try again.');
+      setError((error as Error).message || 'Google sign-in failed. Try again.');
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +63,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-slate-100 px-6 py-8">
-      <div className="hidden md:block w-full max-w-lg">
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center content-between bg-slate-100 px-6 py-8">
+      <div className="hidden md:block md:w-1/2 ">
         <BearAnimation />
       </div>
       
@@ -146,9 +146,7 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full flex justify-center items-center gap-3 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 mt-4"
           >
-            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#4285F4" d="M20.283 10.356h-8.327v3.451h4.758c-.692 2.003-2.568 3.451-4.758 3.451a5.56 5.56 0 01-5.56-5.56 5.56 5.56 0 015.56-5.56c1.422 0 2.67.524 3.632 1.386l2.672-2.673c-1.885-1.719-4.322-2.773-7.003-2.773a9.561 9.561 0 000 19.122c4.938 0 9.095-4.034 9.095-9.095 0-.607-.067-1.2-.183-1.774z"/>
-            </svg>
+            <Image src="/google-icon.svg" alt="Google" width={20} height={20} />
             Google
           </button>
         </div>

@@ -13,7 +13,7 @@ interface LeaderboardUser {
 }
 
 export default function LeaderboardPage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

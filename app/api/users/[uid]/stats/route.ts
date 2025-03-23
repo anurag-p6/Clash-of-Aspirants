@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-type RouteContext = {
-  params: {
-    uid: string;
-  };
-};
+
 
 // GET: Fetch statistics for a specific user
 export async function GET(
   req: NextRequest,
-  context: RouteContext
+  context: { params: Promise<{ uid: string }> }
 ) {
   try {
-    const { uid } = context.params;
+    const { uid } = await context.params;
 
     if (!uid) {
       return NextResponse.json(

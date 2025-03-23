@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { generateAndStoreQuizTemplate } from '@/lib/templates';
 
 // POST: Seed the database with common quiz templates
-export async function POST(_req: NextRequest) {
+export async function POST() {
   try {
     // Define common topics
     const topics = [

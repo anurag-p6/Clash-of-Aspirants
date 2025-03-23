@@ -194,7 +194,7 @@ export default function PricingPage() {
                 <div>
                   <h4 className="font-bold mb-2">What topics can the AI generate quizzes for?</h4>
                   <p className="text-gray-600 text-sm">
-                    Our AI can generate quizzes on a wide range of academic subjects, including science, history, literature, mathematics, and more. We're constantly expanding our topic coverage.
+                    Our AI can generate quizzes on a wide range of academic subjects, including science, history, literature, mathematics, and more. We&apos;re constantly expanding our topic coverage.
                   </p>
                 </div>
               </div>

@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
-
-interface RouteContext {
-  params: { id: string }; // Fix RouteContext type
-}
-
 // GET: Fetch all participants for a room
-export async function GET(req: NextRequest, { params }: RouteContext) {
+export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const { id } =  await context.params;
     
-    if (!id) {
+    if (!id) { 
       return NextResponse.json(
         { error: 'Room ID is required' },
         { status: 400 }
@@ -56,20 +50,33 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
 }
 
 // POST: Add a participant to a room
-export async function POST(req: NextRequest, { params }: RouteContext) {
+export async function POST(_req: NextRequest,{ params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const id = (await params).id;
     
     if (!id) {
+      console.error('Room ID is missing');
       return NextResponse.json(
         { error: 'Room ID is required' },
         { status: 400 }
       );
     }
 
-    const { userId } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await _req.json();
+    } catch (jsonError) {
+      console.error('Error parsing JSON:', jsonError);
+      return NextResponse.json(
+        { error: 'Invalid JSON body' },
+        { status: 400 }
+      );
+    }
+
+    const { userId } = requestBody;
 
     if (!userId || typeof userId !== 'string') {
+      console.error('Invalid User ID:', userId);
       return NextResponse.json(
         { error: 'Valid User ID is required' },
         { status: 400 }
@@ -81,6 +88,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     });
 
     if (!room) {
+      console.error('Room not found or inactive:', id);
       return NextResponse.json(
         { error: 'Room not found or inactive' },
         { status: 404 }
@@ -102,7 +110,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
         return NextResponse.json({ participant: updatedParticipant });
       }
       return NextResponse.json({ participant: existingParticipant });
-    }
+    } 
 
     const participant = await prisma.roomParticipant.create({
       data: { userId, roomId: id },

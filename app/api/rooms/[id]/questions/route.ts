@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
-
 // GET: Fetch all questions for a specific room
 export async function GET(
   req: NextRequest,
-  context: RouteContext
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await params;
 
     try {
       // Check if the room exists and is active

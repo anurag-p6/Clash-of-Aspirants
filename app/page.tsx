@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation';
@@ -80,7 +79,7 @@ export default function HomePage() {
             <div className="bg-white/10 backdrop-blur-lg p-6 rounded-lg">
               <h3 className="text-2xl font-bold mb-4">Dynamic Questions</h3>
               <p>
-                Input topics or prompts, and the system generates relevant quiz questions using OpenAI's language model.
+                Input topics or prompts, and the system generates relevant quiz questions using OpenAI&apos;s language model.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-lg p-6 rounded-lg">

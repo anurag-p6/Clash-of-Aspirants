@@ -39,9 +39,9 @@ interface PageParams {
   id: string;
 }
 
-export default function RoomPage({ params }: { params: PageParams | Promise<PageParams> }) {
+export default function RoomPage({ params }: { params: Promise<PageParams> }) {
   // Unwrap params using React.use() to handle the future Promise-based params
-  const unwrappedParams = use(params as any) as PageParams;
+  const unwrappedParams = use(params);
   const roomId = unwrappedParams.id;
   
   const { user, loading } = useAuth();
@@ -339,9 +339,9 @@ export default function RoomPage({ params }: { params: PageParams | Promise<Page
       }
       setParticipants(participantsData.participants);
       
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching room data:', err);
-      setError(err.message || 'Failed to load quiz room');
+      setError((err as Error).message || 'Failed to load quiz room');
     } finally {
       setIsLoading(false);
     }
@@ -370,8 +370,8 @@ export default function RoomPage({ params }: { params: PageParams | Promise<Page
       }
       
       // Participant is now added to the room
-    } catch (err: any) {
-      console.error('Error joining room:', err);
+    } catch (err) {
+      console.error('Error joining room:', err as Error);
       // Don't set error state - just continue with mock data
       console.log('Continuing with mock data despite join error');
     }
@@ -453,8 +453,8 @@ export default function RoomPage({ params }: { params: PageParams | Promise<Page
         isCorrect: mockIsCorrect,
       });
       
-    } catch (err: any) {
-      console.error('Error submitting answer:', err);
+    } catch (err) {
+      console.error('Error submitting answer:', err as Error);
     }
   };
 

@@ -61,9 +61,9 @@ export default function JoinRoomPage() {
       // Successfully joined the room, redirect to the room page
       router.push(`/rooms/${roomCode}`);
       
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error joining room:', err);
-      setError(err.message || 'Failed to join the room');
+      setError((err as Error).message || 'Failed to join the room');
     } finally {
       setIsJoining(false);
     }

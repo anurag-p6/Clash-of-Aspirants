@@ -24,7 +24,7 @@ export default function FaqPage() {
     },
     {
       question: "How does the AI question generation work?",
-      answer: "We use OpenAI's powerful language models to generate questions based on the topic you provide. The AI creates multiple-choice questions with explanations, ensuring each quiz is unique and tailored to your specified subject matter."
+      answer: "We use OpenAI&apos;s powerful language models to generate questions based on the topic you provide. The AI creates multiple-choice questions with explanations, ensuring each quiz is unique and tailored to your specified subject matter."
     },
     {
       question: "Do I need to create an account to use the platform?",
@@ -32,11 +32,11 @@ export default function FaqPage() {
     },
     {
       question: "How many people can join a quiz room?",
-      answer: "There's no strict limit on the number of participants, but for optimal performance, we recommend up to 50 participants per room. For larger events, consider creating multiple rooms."
+      answer: "There&apos;s no strict limit on the number of participants, but for optimal performance, we recommend up to 50 participants per room. For larger events, consider creating multiple rooms."
     },
     {
       question: "Can I create private quiz rooms?",
-      answer: "Yes, when creating a quiz room, you can set it as private. You'll receive a unique link to share with only those you want to invite."
+      answer: "Yes, when creating a quiz room, you can set it as private. You&apos;ll receive a unique link to share with only those you want to invite."
     },
     {
       question: "How is the scoring calculated?",
@@ -69,7 +69,7 @@ export default function FaqPage() {
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold mb-6">Frequently Asked Questions</h1>
             <p className="text-gray-700 mb-8">
-              Find answers to the most common questions about Clash of Aspirants. If you can't find what you're looking for, please visit our{' '}
+              Find answers to the most common questions about Clash of Aspirants. If you can&apos;t find what you&apos;re looking for, please visit our{' '}
               <Link href="/contact" className="text-indigo-600 hover:underline">Contact page</Link> to reach out to our support team.
             </p>
             

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import MainNav from '@/components/MainNav';
 import Footer from '@/components/Footer';
-import { auth } from '@/lib/firebase';
 
 interface UserStats {
   totalScore: number;
@@ -68,9 +67,9 @@ export default function ProfilePage() {
             // Try to parse as JSON
             const errorData = JSON.parse(responseText);
             errorMessage = errorData.error || `Error fetching stats: ${response.status}`;
-          } catch (parseError) {
+          } catch (error) {
             // If not JSON, use status code
-            console.error('Failed to parse error response:', responseText);
+            console.error('Failed to parse error response:', error as Error);
             errorMessage = `Error fetching stats: ${response.status}`;
           }
           
@@ -83,9 +82,9 @@ export default function ProfilePage() {
         } else {
           throw new Error('Invalid stats data received');
         }
-      } catch (error: any) {
-        console.error('Error fetching user stats:', error);
-        setError(error.message || 'Failed to load user statistics');
+      } catch (error) {
+        console.error('Error fetching user stats:', error as Error);
+        setError((error as Error).message || 'Failed to load user statistics');
         
         // Set default stats as fallback
         setUserStats({
