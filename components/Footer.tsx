@@ -90,6 +90,7 @@ export default function Footer() {
               Terms of Service
             </Link>
           </div>
+          <p className="text-slate-400 text-sm mt-2">Made with ❤️ by <strong>Team V1</strong></p>
         </div>
       </div>
     </footer>

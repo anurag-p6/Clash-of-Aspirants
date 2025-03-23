@@ -5,7 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "node -r @swc-node/register server.js",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "NODE_ENV=production node -r @swc-node/register server.js",
     "lint": "next lint"
   },
