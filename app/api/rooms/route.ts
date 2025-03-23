@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const { name, topic, creatorId, numQuestions = 5 } = body;
+    const { name, topic, creatorId, numQuestions = 5, difficulty } = body;
 
     if (!name || !topic || !creatorId) {
       return NextResponse.json(
@@ -119,12 +119,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (difficulty !== 'easy' && difficulty !== 'medium' && difficulty !== 'hard') {
+      return NextResponse.json(
+        { error: 'Invalid difficulty value' },
+        { status: 400 }
+      );
+    }
     try {
       // Create a new quiz room
       const room = await prisma.quizRoom.create({
         data: {
           name,
           topic,
+          difficulty,
           creatorId,
         },
       });
@@ -140,7 +147,7 @@ export async function POST(req: NextRequest) {
       console.log("Room and participant created successfully, attempting to create template...");
       
       // Find or generate a quiz template for this topic
-      const template = await generateAndStoreQuizTemplate(topic, numQuestions);
+      const template = await generateAndStoreQuizTemplate(topic, numQuestions, difficulty);
       
       console.log("Template created/found:", template.id, "with", template.questions.length, "questions");
       

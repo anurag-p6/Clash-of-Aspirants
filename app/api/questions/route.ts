@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const { topic, numQuestions = 5, roomId } = body;
+    const { topic, numQuestions = 5, roomId, difficulty } = body;
 
     if (!topic) {
       return NextResponse.json(
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     try {
       // Find or create a template for this topic
-      const template = await generateAndStoreQuizTemplate(topic, numQuestions);
+      const template = await generateAndStoreQuizTemplate(topic, numQuestions, difficulty);
       
       // Get the questions from the template
       const templateQuestions = template.questions;
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       console.error('Database error storing questions:', dbError);
       
       // Fall back to generating questions directly without storing in database
-      const aiQuestions = await generateQuizQuestions(topic, numQuestions);
+      const aiQuestions = await generateQuizQuestions(topic, numQuestions, difficulty);
       
       // Create mock question data with IDs
       const mockQuestions = aiQuestions.map((q, index) => ({

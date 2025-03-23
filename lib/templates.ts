@@ -4,7 +4,7 @@ import { generateQuizQuestions, QuizQuestion } from "@/lib/openai";
 /**
  * Create a new quiz template in the database
  */
-export async function createQuizTemplate(topic: string, questions: QuizQuestion[]) {
+export async function createQuizTemplate(topic: string, questions: QuizQuestion[], difficulty: string) {
   try {
     // Validate that we have valid questions before proceeding
     if (!Array.isArray(questions) || questions.length === 0) {
@@ -61,7 +61,7 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
 /**
  * Generate and store a new quiz template
  */
-export async function generateAndStoreQuizTemplate(topic: string, numQuestions: number = 5) {
+export async function generateAndStoreQuizTemplate(topic: string, numQuestions: number = 5, difficulty: string) {
   try {
     // Check if a template for this topic already exists
     const existingTemplate = await prisma.quizTemplate.findFirst({
@@ -69,7 +69,8 @@ export async function generateAndStoreQuizTemplate(topic: string, numQuestions: 
         topic: {
           equals: topic,
           mode: "insensitive"
-        }
+        },
+        
       },
       include: {
         questions: true
@@ -82,10 +83,10 @@ export async function generateAndStoreQuizTemplate(topic: string, numQuestions: 
     }
     
     // Generate new questions using AI
-    const questions = await generateQuizQuestions(topic, numQuestions);
+    const questions = await generateQuizQuestions(topic, numQuestions, difficulty);
     
     // Create a new template
-    const template = await createQuizTemplate(topic, questions);
+    const template = await createQuizTemplate(topic, questions, difficulty);
     
     return template;
   } catch (error) {

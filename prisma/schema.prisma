@@ -21,10 +21,11 @@ model User {
 }
 
 model QuizTemplate {
-  id        String                 @id @default(uuid())
-  topic     String
-  createdAt DateTime               @default(now())
-  questions QuizTemplateQuestion[]
+  id         String                 @id @default(uuid())
+  topic      String
+  difficulty String                 @default("easy")
+  createdAt  DateTime               @default(now())
+  questions  QuizTemplateQuestion[]
 }
 
 model QuizTemplateQuestion {
@@ -44,6 +45,7 @@ model QuizRoom {
   id           String            @id @default(uuid())
   name         String
   topic        String
+  difficulty   String            @default("easy")
   creatorId    String
   isActive     Boolean           @default(true)
   createdAt    DateTime          @default(now())

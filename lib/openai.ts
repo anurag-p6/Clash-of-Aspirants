@@ -60,7 +60,7 @@ function generateMockQuestions(topic: string, numQuestions: number): QuizQuestio
 /**
  * Generate quiz questions using Gemini API
  */
-export async function generateQuizQuestions(topic: string, numQuestions: number = 5): Promise<QuizQuestion[]> {
+export async function generateQuizQuestions(topic: string, numQuestions: number = 5, difficulty: string): Promise<QuizQuestion[]> {
   if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY && !process.env.GEMINI_API_KEY) {
     console.log("⚠️ No valid Gemini API key found. Using mock questions.");
     return generateMockQuestions(topic, numQuestions);
@@ -68,47 +68,47 @@ export async function generateQuizQuestions(topic: string, numQuestions: number 
 
   try {
     const prompt = `
-      Generate ${numQuestions} multiple-choice quiz questions on "${topic}".
-      
-      Important: Return ONLY the raw JSON array without code blocks, markdown, or any other formatting.
-      
-      Format response as:
-      [{
-        "question": "Text of the question",
-        "options": ["Option A", "Option B", "Option C", "Option D"],
-        "correctOptionIndex": index of correct option (0-3),
-        "explanation": "Brief reason why this answer is correct"
-      }]
+      Generate exactly ${numQuestions} multiple-choice quiz questions on the topic "${topic}" with a difficulty level of "${difficulty}". Ensure the questions are clear, well-structured,not repeated, and appropriate for the given difficulty.
+      Format the response as a raw JSON array (without code blocks, markdown, or any other formatting):
+      [
+      {
+      "question": "Text of the question",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctOptionIndex": <index of the correct option (0-3)>,
+      "explanation": "Brief reason why this answer is correct"
+      },
+      ... (remaining questions)
+      ]
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response.text();
-    
+
     // Clean up the response to handle markdown code blocks
     let cleanedResponse = response;
     // Remove markdown code blocks if present
     if (response.includes("```")) {
       cleanedResponse = response.replace(/```json\s?/g, "").replace(/```\s?/g, "");
     }
-    
+
     // Remove any leading/trailing whitespace
     cleanedResponse = cleanedResponse.trim();
-    
+
     // Ensure the response starts with [ and ends with ]
     if (!cleanedResponse.startsWith("[") || !cleanedResponse.endsWith("]")) {
       throw new Error("Response is not a valid JSON array");
     }
-    
+
     console.log("Cleaned response:", cleanedResponse);
-    
+
     try {
       const parsedResponse = JSON.parse(cleanedResponse);
-      
+
       if (Array.isArray(parsedResponse)) {
         // Validate the structure of each question
         const validatedQuestions = parsedResponse.map((q, index) => {
-          if (!q.question || !Array.isArray(q.options) || q.options.length < 2 || 
-              typeof q.correctOptionIndex !== 'number' || !q.explanation) {
+          if (!q.question || !Array.isArray(q.options) || q.options.length < 2 ||
+            typeof q.correctOptionIndex !== 'number' || !q.explanation) {
             // Fix malformed questions with minimal data
             return {
               question: q.question || `Question ${index + 1} about ${topic}`,
@@ -119,7 +119,7 @@ export async function generateQuizQuestions(topic: string, numQuestions: number 
           }
           return q;
         });
-        
+
         return validatedQuestions;
       }
       throw new Error("Invalid JSON format received from Gemini API");

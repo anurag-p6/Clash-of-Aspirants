@@ -15,6 +15,10 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 
     const room = await prisma.quizRoom.findUnique({
       where: { id, isActive: true },
+      select: {
+        id: true,
+        isActive: true,
+      },
     });
 
     if (!room) {

@@ -22,7 +22,7 @@ export async function POST() {
     const results = await Promise.all(
       topics.map(async (topic) => {
         try {
-          const template = await generateAndStoreQuizTemplate(topic, 10);
+          const template = await generateAndStoreQuizTemplate(topic, 10, "easy");
           return {
             topic,
             id: template.id,

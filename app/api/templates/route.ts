@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate or fetch existing template
-    const template = await generateAndStoreQuizTemplate(topic, numQuestions);
+    const template = await generateAndStoreQuizTemplate(topic, numQuestions, "easy");
     
     return NextResponse.json({ template });
   } catch (error) {

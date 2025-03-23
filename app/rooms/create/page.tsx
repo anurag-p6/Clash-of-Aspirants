@@ -11,6 +11,7 @@ export default function CreateRoomPage() {
   const [name, setName] = useState('');
   const [topic, setTopic] = useState('');
   const [numQuestions, setNumQuestions] = useState(5);
+  const [difficulty, setDifficulty] = useState('easy');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [createdRoom, setCreatedRoom] = useState<{ id: string; name: string } | null>(null);
@@ -25,12 +26,12 @@ export default function CreateRoomPage() {
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !user.id) {
       setError('You must be logged in to create a room');
       return;
     }
-    
+
     if (!name.trim() || !topic.trim()) {
       setError('Room name and topic are required');
       return;
@@ -46,7 +47,7 @@ export default function CreateRoomPage() {
 
     try {
       console.log('Creating room with creator ID:', user.id);
-      
+
       // Create the room
       const roomResponse = await fetch('/api/rooms', {
         method: 'POST',
@@ -57,7 +58,8 @@ export default function CreateRoomPage() {
           name,
           topic,
           creatorId: user.id,
-          numQuestions
+          numQuestions,
+          difficulty
         }),
       });
 
@@ -81,7 +83,7 @@ export default function CreateRoomPage() {
         id: roomId,
         name: name
       });
-      
+
     } catch (error) {
       console.error('Error creating room:', error);
       setError((error as Error).message || 'Failed to create room. Please try again.');
@@ -146,7 +148,7 @@ export default function CreateRoomPage() {
                   <p className="text-gray-600 mb-6">
                     Your quiz room &quot{createdRoom.name}&quot is ready. Share the code with others to join.
                   </p>
-                  
+
                   <div className="bg-indigo-50 rounded-lg p-4 mb-6 max-w-md mx-auto">
                     <p className="text-sm text-indigo-700 mb-2">Room Code:</p>
                     <div className="flex items-center justify-center">
@@ -164,7 +166,7 @@ export default function CreateRoomPage() {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <button
                       onClick={enterRoom}
@@ -235,6 +237,22 @@ export default function CreateRoomPage() {
                         Choose between 1 and 20 questions for your quiz
                       </p>
                     </div>
+
+                    <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Difficulty Level:
+                    </label>
+                    <select
+                      id="difficulty"
+                      name="difficulty"
+                      value={difficulty}
+                      onChange={(e) => setDifficulty(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      aria-label="Select difficulty level"
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </select>
 
                     <div className="pt-4">
                       <button
