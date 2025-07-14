@@ -22,7 +22,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <MainNav />
-      <main className="flex-1 bg-gradient-to-b from-slate-900 to-indigo-900 text-white">
+      <main className="flex-1 bg-gradient-to-b from-black to-indigo-900 text-white">
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-3xl mx-auto text-center">
             <motion.h2
@@ -41,14 +41,14 @@ export default function HomePage() {
               {!loading && !user ? (
                 <Link
                   href="/auth/register"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md text-lg font-medium"
                 >
                   Sign Up
                 </Link>
               ) : !loading && user ? (
                 <Link
                   href="/dashboard"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-md text-lg font-medium"
                 >
                   Go to Dashboard
                 </Link>
@@ -62,13 +62,13 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => handleRoomAction('create')}
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-md text-lg font-medium"
               >
                 Create Quiz Room
               </button>
               <button
                 onClick={() => handleRoomAction('join')}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-md text-lg font-medium"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-md text-lg font-medium"
               >
                 Join Quiz Room
               </button>
