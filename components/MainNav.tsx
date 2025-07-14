@@ -33,7 +33,7 @@ export default function MainNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="bg-slate-900 text-white border-b-[0.01rem] border-slate-500">
+    <header className="bg-black text-white border-b-[0.02rem] border-slate-500">
       <div className="container mx-auto px-4 py-6 flex justify-between">
         <div className="flex justify-end items-center">
           {/* Left Side - Logo */}
@@ -47,19 +47,19 @@ export default function MainNav() {
                 <>
                   <Link
                     href="/"
-                    className={`hover:text-indigo-300 ${isActive('/') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     Home
                   </Link>
                   <Link
                     href="/dashboard"
-                    className={`hover:text-indigo-300 ${isActive('/dashboard') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/dashboard') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     Dashboard
                   </Link>
                   <Link
                     href="/pricing"
-                    className={`hover:text-indigo-300 ${isActive('/pricing') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/pricing') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     Pricing
                   </Link>
@@ -68,31 +68,31 @@ export default function MainNav() {
                 <>
                   <Link
                     href="/"
-                    className={`hover:text-indigo-300 ${isActive('/') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     Home
                   </Link>
                   <Link
                     href="/about"
-                    className={`hover:text-indigo-300 ${isActive('/about') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-400 ${isActive('/about') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     About
                   </Link>
                   <Link
                     href="/pricing"
-                    className={`hover:text-indigo-300 ${isActive('/pricing') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/pricing') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     Pricing
                   </Link>
                   <Link
                     href="/faq"
-                    className={`hover:text-indigo-300 ${isActive('/faq') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/faq') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     FAQ
                   </Link>
                   <Link
                     href="/contact"
-                    className={`hover:text-indigo-300 ${isActive('/contact') ? 'text-indigo-300 font-medium' : ''}`}
+                    className={`hover:text-indigo-500 ${isActive('/contact') ? 'text-indigo-300 font-medium' : ''}`}
                   >
                     Contact
                   </Link>
@@ -136,12 +136,12 @@ export default function MainNav() {
               </div>
             ) : !loading ? (
               <>
-                <Link href="/auth/login" className="hover:text-indigo-300">
+                <Link href="/auth/login" className="hover:text-indigo-500">
                   Sign In
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-sm"
                 >
                   Sign Up
                 </Link>

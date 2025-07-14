@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Clash of Aspirants - Interactive Quiz Platform",
+  title: "Clash of Aspirants",
   description: "An interactive quiz platform that leverages OpenAI to generate dynamic quiz questions.",
   icons:{
     icon:"/logo.svg",

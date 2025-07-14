@@ -1,12 +1,12 @@
 import Link from "next/link";
 export const Logo = () => {
     return (    
-        <Link className="border-none border-[#0f172b] rounded-2xl overflow-hidden cursor-pointer" href="/">
+        <Link className="border-none bg-[#0f172b] rounded-2xl overflow-hidden cursor-pointer" href="/">
         <svg 
             version="1.0" 
             xmlns="http://www.w3.org/2000/svg" 
-            width="50px"
-            height="50px" 
+            width="40px"
+            height="40px" 
             viewBox="0 0 500.000000 500.000000"
             preserveAspectRatio="xMidYMid meet"
         >
@@ -15,7 +15,7 @@ export const Logo = () => {
 
             <g 
                 transform="translate(0.000000,500.000000) scale(0.100000,-0.100000)"
-                fill= "#0f172b"
+                fill= "#000000"
                 stroke="black"
             >
                 <path d="M0 2500 l0 -2500 2500 0 2500 0 0 2500 0 2500 -2500 0 -2500 0 0
