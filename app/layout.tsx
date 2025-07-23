@@ -6,7 +6,11 @@ import { SocketProvider } from "@/lib/socket-context";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+   subsets: ["latin"],
+   display: 'swap',
+   variable: '--font-inter',
+  });
 
 export const metadata: Metadata = {
   title: "Clash of Aspirants",

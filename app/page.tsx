@@ -22,7 +22,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <MainNav />
-      <main className="flex-1 bg-gradient-to-b dark:from-black dark:to-indigo-900 light:from-white">
+      <main className="flex-1 bg-gradient-to-b dark:from-black dark:to-[#200559] from-white to-[#200559]">
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-3xl mx-auto text-center">
             <motion.h2
@@ -34,7 +34,7 @@ export default function HomePage() {
               Test Your Knowledge, Challenge Your Friends!
             </motion.h2>
             <p className="text-xl mb-12">
-              Clash of Aspirants is an interactive quiz platform that leverages AI to generate dynamic quiz questions.
+              Clash of Aspirants is an interactive latform that leverages AI to generate dynamic quiz questions.
               Create or join quiz rooms, compete in real-time, and track your performance on leaderboards.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

@@ -34,13 +34,12 @@ export default function MainNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="dark:bg-black text-white border-b-[0.02rem] border-slate-500">
+    <header className="dark:bg-black dark:text-white border-b-[0.03rem] border-slate-500">
       <div className="container mx-auto px-4 py-6 flex justify-between">
         <div className="flex justify-end items-center">
           {/* Left Side - Logo */}
           <div className="flex items-center justify-evenly space-x-8">
             <Logo />
-            <ModeToggle />
           </div>
 
             {/* Navigation Links */}
@@ -108,18 +107,19 @@ export default function MainNav() {
             {!loading && user ? (
               <div className="relative" ref={dropdownRef}>
                 <div 
-                  className="flex items-center cursor-pointer"
-                  onClick={toggleDropdown}
+                  className="flex items-center gap-7 cursor-pointer"
                 >
-                  <span className="hidden md:inline mr-2">Hi, {user.username}</span>
-                  <div className="h-9 w-9 bg-indigo-500 rounded-full flex items-center justify-center hover:bg-indigo-600 transition-colors">
+                      <ModeToggle />
+                  <div 
+                  className="h-9 w-9 bg-indigo-500 rounded-full flex items-center justify-center hover:bg-indigo-600 transition-colors"
+                  onClick={toggleDropdown}>
                     {user.username?.charAt(0).toUpperCase() || "U"}
                   </div>
                 </div>
                 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    <Link href="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-indigo-600 bg-white rounded-md shadow-lg py-1 z-10">
+                    <Link href="/profile" className="flex items-center px-4 py-2 text-sm dark:text-white text-gray-700 hover:bg-gray-100">
                       <User size={16} className="mr-2" />
                       <span>Profile</span>
                     </Link>
@@ -128,7 +128,7 @@ export default function MainNav() {
                         signOut();
                         setIsDropdownOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-500 dark:text-red-200 hover:bg-gray-100"
                     >
                       <LogOut size={16} className="mr-2" />
                       <span>Sign Out</span>
