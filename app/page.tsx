@@ -22,7 +22,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <MainNav />
-      <main className="flex-1 bg-gradient-to-b from-black to-indigo-900 text-white">
+      <main className="flex-1 bg-gradient-to-b dark:from-black dark:to-indigo-900 light:from-white">
         <div className="container mx-auto px-4 py-20">
           <div className="max-w-3xl mx-auto text-center">
             <motion.h2

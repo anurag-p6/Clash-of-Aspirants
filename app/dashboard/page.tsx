@@ -50,7 +50,7 @@ export default function DashboardPage() {
         let roomsData;
         try {
           roomsData = await roomsResponse.json();
-          setActiveRooms(roomsData.rooms || []);
+          setActiveRooms(roomsData.rooms.slice(0,5) || []);
         } catch (jsonError) {
           console.error('Error parsing rooms response:', jsonError);
           setActiveRooms([]);

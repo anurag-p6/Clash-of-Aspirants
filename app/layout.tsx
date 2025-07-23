@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { SocketProvider } from "@/lib/socket-context";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,12 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className} suppressHydrationWarning>
-        <AuthProvider>
-          <SocketProvider>
-            {children}
-            <Toaster />
-          </SocketProvider>
-        </AuthProvider>
+        <ThemeProvider attribute="class" >
+          <AuthProvider>
+            <SocketProvider>
+              {children}
+              <Toaster />
+            </SocketProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

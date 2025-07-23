@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Logo } from '@/public/logo';
 import { User, LogOut } from 'lucide-react';
+import { ModeToggle } from '@/components/ThemeToggle';
 
 export default function MainNav() {
   const pathname = usePathname();
@@ -33,12 +34,13 @@ export default function MainNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="bg-black text-white border-b-[0.02rem] border-slate-500">
+    <header className="dark:bg-black text-white border-b-[0.02rem] border-slate-500">
       <div className="container mx-auto px-4 py-6 flex justify-between">
         <div className="flex justify-end items-center">
           {/* Left Side - Logo */}
           <div className="flex items-center justify-evenly space-x-8">
             <Logo />
+            <ModeToggle />
           </div>
 
             {/* Navigation Links */}

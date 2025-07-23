@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { Eye, EyeOff } from "lucide-react";
-import { BearAnimation } from '@/components/animation/bear';
+import { BearAnimation } from '@/components/animation/LoginAnimation';
 import Image from 'next/image';
 
 export default function RegisterPage() {
