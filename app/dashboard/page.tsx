@@ -128,7 +128,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* User Statistics Section */}
             <div>
-              <div className="bg-white dark:bg-black rounded-lg border border-indigo-600 shadow-md p-6 mb-6">
+              <div className="bg-white dark:bg-black rounded-lg border border-slate-700 dark:border-indigo-600 shadow-md p-6 mb-6">
                 <h3 className="text-lg sm:text-xl font-bold mb-4">Your Statistics</h3>
                 <div className="grid bg-white dark:bg-black grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
@@ -146,7 +146,7 @@ export default function DashboardPage() {
               </div>
 
               {/* User Quiz Rooms Section */}
-              <div className="bg-white dark:bg-black rounded-lg shadow-md p-6 border border-indigo-600">
+              <div className="bg-white dark:bg-black rounded-lg shadow-md p-6 border border-slate-700 dark:border-indigo-600">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg sm:text-xl font-bold">Your Quiz Rooms</h3>
                   <Link href="/profile" className="text-indigo-600 hover:underline text-sm">
@@ -177,7 +177,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Active Quiz Rooms Section */}
-            <div className=" dark:bg-black rounded-lg shadow-md p-6 border border-indigo-600">
+            <div className=" dark:bg-black rounded-lg shadow-md p-6 border border-slate-700 dark:border-indigo-600">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg sm:text-xl font-bold">Active Quiz Rooms</h3>
                 <Link href="/leaderboard" className="text-indigo-600 hover:underline text-sm">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 export const Logo = () => {
     return (    
-        <Link className="border-none bg-[#0f172b] rounded-6xl overflow-hidden cursor-pointer" href="/">
+        <Link className="border-none rounded-6xl overflow-hidden cursor-pointer" href="/">
         <svg 
             version="1.0" 
             xmlns="http://www.w3.org/2000/svg" 
@@ -14,7 +14,7 @@ export const Logo = () => {
             <circle className="fill-black dark:fill-white" fill="white" cx="240px" cy="220px" r="40%" />
 
             <g 
-                className="fill-white dark:fill-black"
+                className="fill-slate-100 dark:fill-black"
                 transform="translate(0.000000,500.000000) scale(0.100000,-0.100000)"
                 fill= "#000000"
                
