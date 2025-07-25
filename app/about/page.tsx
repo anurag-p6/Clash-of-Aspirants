@@ -7,12 +7,12 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100">
+      <main className="flex-1 bg-gradient-to-b dark:from-black via-black dark:to-[#200559] bg-slate-100">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold mb-6">About Clash of Aspirants</h1>
             
-            <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+            <div className="bg-white dark:bg-transparent border dark:border-indigo-600 rounded-lg shadow-md p-8 mb-8">
               <h2 className="text-2xl font-bold mb-4">What is Clash of Aspirants?</h2>
               <p className="text-gray-700 mb-6">
                 Clash of Aspirants is an interactive quiz platform that leverages OpenAI powerful language models to generate dynamic quiz questions based on user prompts. Whether you&apos;re a student studying for exams, a teacher looking to engage your class, or just someone who enjoys testing their knowledge, our platform provides a fun and competitive environment for learning.
