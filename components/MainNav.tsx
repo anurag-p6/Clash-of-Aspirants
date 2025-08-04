@@ -7,12 +7,14 @@ import { useAuth } from '@/lib/auth-context';
 import { Logo } from '@/public/logo';
 import { User, LogOut } from 'lucide-react';
 import { ModeToggle } from '@/components/ThemeToggle';
+import SideBar from './ui/Sidebar';
 
 export default function MainNav() {
   const pathname = usePathname();
   const { user, loading, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,10 +33,14 @@ export default function MainNav() {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="bg-slate-100 dark:bg-black dark:text-white border-b-[0.03rem] border-black dark:border-slate-500">
+    <header className=" dark:bg-black z-1 dark:text-white border-b-[0.03rem] border-black dark:border-slate-500">
       <div className="container mx-auto px-4 py-6 flex justify-between">
         <div className="flex justify-end items-center">
           {/* Left Side - Logo */}
@@ -48,19 +54,19 @@ export default function MainNav() {
                 <>
                   <Link
                     href="/"
-                    className={`hover:text-slate-900 dark:hover:text-indigo-500 ${isActive('/') ?  'text-black dark:text-indigo-300 font-medium' : 'text-slate-700 '}`}
+                    className={`hover:text-slate-900 dark:hover:text-indigo-500 ${isActive('/') ?  'text-black dark:text-indigo-300 font-medium' : 'text-slate-700 dark:text-white '}`}
                   >
                     Home
                   </Link>
                   <Link
                     href="/dashboard"
-                    className={`hover:text-slate-900 dark:hover:text-indigo-500 ${isActive('/dashboard') ? 'text-black dark:text-indigo-300 font-medium' : 'text-slate-700'}`}
+                    className={`hover:text-slate-900 dark:hover:text-indigo-500 ${isActive('/dashboard') ? 'text-black dark:text-indigo-300 font-medium' : 'text-slate-700 dark:text-white'}`}
                   >
                     Dashboard
                   </Link>
                   <Link
                     href="/pricing"
-                    className={` hover:text-slate-900 dark:hover:text-indigo-500 ${isActive('/pricing') ? 'text-black dark:text-indigo-300 font-medium' : 'text-slate-700'}`}
+                    className={` hover:text-slate-900 dark:hover:text-indigo-500 ${isActive('/pricing') ? 'text-black dark:text-indigo-300 font-medium' : 'text-slate-700 dark:text-white'}`}
                   >
                     Pricing
                   </Link>
@@ -116,8 +122,8 @@ export default function MainNav() {
                 </div>
                 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-slate-600 bg-white rounded-md shadow-lg py-1 z-10">
-                    <Link href="/profile" className="flex items-center px-4 py-2 text-sm dark:text-white text-gray-700 hover:bg-gray-100">
+                  <div className="absolute right-0 mt-2 w-48 dark:text-white dark:bg-slate-800 bg-white rounded-md shadow-lg py-1 ">
+                    <Link href="/profile" className="flex items-center px-4 py-2 text-sm dark:text-white text-gray-700 hover:bg-slate-200 dark:hover:bg-slate-900">
                       <User size={16} className="mr-2" />
                       <span>Profile</span>
                     </Link>
@@ -126,7 +132,7 @@ export default function MainNav() {
                         signOut();
                         setIsDropdownOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-800 dark:text-red-300 hover:bg-gray-100"
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-600 hover:bg-slate-200 dark:hover:bg-slate-900"
                     >
                       <LogOut size={16} className="mr-2" />
                       <span>Sign Out</span>
@@ -137,12 +143,16 @@ export default function MainNav() {
             ) : !loading ? (
               <>
               <ModeToggle />
-                <Link href="/auth/login" className="hover:text-indigo-500">
+              {/* <div className='md:hidden block cursor-pointer' onClick={toggleMobileMenu}> 
+                  <SideBar />
+              </div> */}
+         
+                <Link href="/auth/login" className="md:block hover:text-indigo-500">
                   Sign In
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="bg-indigo-600 border howve hover:bg-indigo-700 text-white px-3 py-1 rounded-sm"
+                  className="md:block bg-indigo-600 border hover:bg-indigo-700 text-white px-3 py-1 rounded-sm"
                 >
                   Sign Up
                 </Link>

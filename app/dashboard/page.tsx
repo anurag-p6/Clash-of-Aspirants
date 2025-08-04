@@ -102,17 +102,17 @@ export default function DashboardPage() {
   }, [user]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative">
       <MainNav />
 
-      <main className="flex-1 bg-gradient-to-b dark:from-black dark:to-[#200559]">
+      <main className="flex-1 bg-slate-100 bg-gradient-to-b dark:from-black dark:to-[#200559] ">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">Dashboard</h2>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-0">
               <Link
                 href="/rooms/join"
-                className="border border-indigo-600 dark:text-white text-indigo-600 hover:text-white  hover:bg-indigo-700 dark:hover:text-white px-4 py-2 rounded-md text-center"
+                className="border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white dark:text-white dark:hover:bg-indigo-500 px-4 py-2 rounded-md text-center"
               >
                 Join Room
               </Link>
@@ -128,7 +128,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* User Statistics Section */}
             <div>
-              <div className="bg-white dark:bg-black rounded-lg border border-slate-700 dark:border-indigo-600 shadow-md p-6 mb-6">
+              <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-indigo-600 shadow-md p-6 mb-6">
                 <h3 className="text-lg sm:text-xl font-bold mb-4">Your Statistics</h3>
                 <div className="grid bg-white dark:bg-black grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
@@ -137,16 +137,16 @@ export default function DashboardPage() {
                     { label: 'Rooms Joined', value: userStats.roomsJoined },
                     { label: 'Correct Answers', value: userStats.correctAnswers }
                   ].map((stat, index) => (
-                    <div key={index} className="bg-slate-100 dark:bg-black p-4 rounded-md text-center">
+                    <div key={index} className="bg-slate-100 dark:bg-slate-900 p-4 rounded-md text-center">
                       <div className="text-xl sm:text-2xl font-bold text-indigo-600">{stat.value}</div>
-                      <div className="text-sm text-gray-500">{stat.label}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</div>
                   </div>
                   ))}
                 </div>
               </div>
 
               {/* User Quiz Rooms Section */}
-              <div className="bg-white dark:bg-black rounded-lg shadow-md p-6 border border-slate-700 dark:border-indigo-600">
+              <div className="bg-white dark:bg-black rounded-lg shadow-md p-6 border border-slate-200 dark:border-indigo-600">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg sm:text-xl font-bold">Your Quiz Rooms</h3>
                   <Link href="/profile" className="text-indigo-600 hover:underline text-sm">
@@ -161,9 +161,9 @@ export default function DashboardPage() {
                 ) : userRooms.length > 0 ? (
                   <div className="space-y-4">
                     {userRooms.slice(0, 3).map((room) => (
-                      <Link key={room.id} href={`/rooms/${room.id}`} className="block border rounded-md p-4 hover:bg-[#1a1a1a]">
+                      <Link key={room.id} href={`/rooms/${room.id}`} className="block border dark:border-gray-700 rounded-md p-4 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]">
                           <h4 className="font-medium">{room.name}</h4>
-                          <div className="flex justify-between mt-2 text-sm text-gray-500">
+                          <div className="flex justify-between mt-2 text-sm text-gray-500 dark:text-gray-400">
                             <span>Topic: {room.topic}</span>
                             <span>{room.participantCount} participants</span>
                           </div>
@@ -171,13 +171,13 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center">You haven’t created any quiz rooms yet.</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-center">You haven’t created any quiz rooms yet.</p>
                 )}
               </div>
             </div>
 
             {/* Active Quiz Rooms Section */}
-            <div className=" dark:bg-black rounded-lg shadow-md p-6 border border-slate-700 dark:border-indigo-600">
+            <div className="bg-white dark:bg-black rounded-lg shadow-md p-6 border border-slate-200 dark:border-indigo-600">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg sm:text-xl font-bold">Active Quiz Rooms</h3>
                 <Link href="/leaderboard" className="text-indigo-600 hover:underline text-sm">
@@ -192,14 +192,14 @@ export default function DashboardPage() {
               ) : activeRooms.length > 0 ? (
                 <div className="space-y-4">
                   {activeRooms.map((room) => (
-                    <Link key={room.id} href={`/rooms/${room.id}`} className="block border rounded-md p-4 hover:bg-[#1a1a1a]">
+                    <Link key={room.id} href={`/rooms/${room.id}`} className="block border dark:border-gray-700 rounded-md p-4 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]">
                         <h4 className="font-medium">{room.name}</h4>
-                      <div className="text-sm text-gray-500">{room.topic} · {room.participantCount} participants</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{room.topic} · {room.participantCount} participants</div>
                       </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center">No active quiz rooms available.</p>
+                <p className="text-gray-500 dark:text-gray-400 text-center">No active quiz rooms available.</p>
               )}
             </div>
           </div>
@@ -209,4 +209,4 @@ export default function DashboardPage() {
       <Footer />
     </div>
   );
-} 
+}

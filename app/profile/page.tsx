@@ -108,7 +108,7 @@ export default function ProfilePage() {
 
   if (loading || !user) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100">
+      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-black">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -118,7 +118,7 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100">
+      <main className="flex-1 bg-slate-100 dark:bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-8">
@@ -131,22 +131,22 @@ export default function ProfilePage() {
               </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6 mb-8">
               <h2 className="text-xl font-bold mb-4">Profile Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="mb-4">
-                    <label className="block text-gray-500 text-sm mb-1">Username</label>
+                    <label className="block text-gray-500 dark:text-gray-400 text-sm mb-1">Username</label>
                     <div className="font-medium">{user.username}</div>
                   </div>
                   <div>
-                    <label className="block text-gray-500 text-sm mb-1">Email</label>
+                    <label className="block text-gray-500 dark:text-gray-400 text-sm mb-1">Email</label>
                     <div className="font-medium">{user.email}</div>
                   </div>
                 </div>
                 <div>
                   <div className="mb-4">
-                    <label className="block text-gray-500 text-sm mb-1">Member Since</label>
+                    <label className="block text-gray-500 dark:text-gray-400 text-sm mb-1">Member Since</label>
                     <div className="font-medium">
                       {memberSince 
                         ? memberSince.toLocaleDateString(undefined, { 
@@ -159,60 +159,60 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-gray-500 text-sm mb-1">Total Score</label>
-                    <div className="font-medium text-indigo-600">{userStats.totalScore} points</div>
+                    <label className="block text-gray-500 dark:text-gray-400 text-sm mb-1">Total Score</label>
+                    <div className="font-medium text-indigo-600 dark:text-indigo-400">{userStats.totalScore} points</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6 mb-8">
               <h2 className="text-xl font-bold mb-4">Your Statistics</h2>
               {isLoading ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
                 </div>
               ) : error ? (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400 px-4 py-3 rounded">
                   {error}
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-indigo-50 p-4 rounded-md text-center">
-                      <div className="text-2xl font-bold text-indigo-600">{userStats.quizzesCreated}</div>
-                      <div className="text-sm text-gray-500">Quizzes Created</div>
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{userStats.quizzesCreated}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Quizzes Created</div>
                     </div>
-                    <div className="bg-indigo-50 p-4 rounded-md text-center">
-                      <div className="text-2xl font-bold text-indigo-600">{userStats.quizzesJoined}</div>
-                      <div className="text-sm text-gray-500">Quizzes Joined</div>
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{userStats.quizzesJoined}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Quizzes Joined</div>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-md text-center">
-                      <div className="text-2xl font-bold text-green-600">{userStats.correctAnswers}</div>
-                      <div className="text-sm text-gray-500">Correct Answers</div>
+                    <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">{userStats.correctAnswers}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Correct Answers</div>
                     </div>
-                    <div className="bg-red-50 p-4 rounded-md text-center">
-                      <div className="text-2xl font-bold text-red-600">{userStats.incorrectAnswers}</div>
-                      <div className="text-sm text-gray-500">Incorrect Answers</div>
+                    <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md text-center">
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">{userStats.incorrectAnswers}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Incorrect Answers</div>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-4 rounded-md">
+                    <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-md">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-500">Total Questions Answered</span>
+                        <span className="text-gray-500 dark:text-gray-400">Total Questions Answered</span>
                         <span className="font-bold">{userStats.totalAnswers}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500">Accuracy</span>
-                        <span className="font-bold text-indigo-600">{userStats.accuracy}%</span>
+                        <span className="text-gray-500 dark:text-gray-400">Accuracy</span>
+                        <span className="font-bold text-indigo-600 dark:text-indigo-400">{userStats.accuracy}%</span>
                       </div>
                     </div>
                     
-                    <div className="bg-indigo-50 p-4 rounded-md">
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-md">
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-indigo-600">{userStats.totalScore}</div>
-                        <div className="text-sm text-gray-500">Total Score</div>
+                        <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{userStats.totalScore}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Total Score</div>
                       </div>
                     </div>
                   </div>
@@ -220,7 +220,7 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link
@@ -231,7 +231,7 @@ export default function ProfilePage() {
                 </Link>
                 <Link
                   href="/leaderboard"
-                  className="block text-center bg-white hover:bg-gray-100 text-indigo-700 border border-indigo-300 px-4 py-3 rounded-md"
+                  className="block text-center bg-white hover:bg-gray-100 text-indigo-700 border border-indigo-300 px-4 py-3 rounded-md dark:bg-slate-800 dark:text-indigo-400 dark:border-indigo-700 dark:hover:bg-slate-700"
                 >
                   View Global Leaderboard
                 </Link>
@@ -244,4 +244,4 @@ export default function ProfilePage() {
       <Footer />
     </div>
   );
-} 
+}

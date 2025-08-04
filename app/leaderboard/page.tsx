@@ -42,12 +42,12 @@ export default function LeaderboardPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100">
+      <main className="flex-1 bg-slate-100 dark:bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold mb-8">Global Leaderboard</h1>
             
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md overflow-hidden">
               <div className="px-6 py-4 bg-indigo-600 text-white">
                 <h2 className="text-xl font-bold">Top Scoring Users</h2>
               </div>
@@ -60,7 +60,7 @@ export default function LeaderboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gray-50 border-b">
+                      <tr className="bg-gray-50 dark:bg-slate-800 border-b dark:border-gray-700">
                         <th className="py-3 px-6 text-left">Rank</th>
                         <th className="py-3 px-6 text-left">User</th>
                         <th className="py-3 px-6 text-right">Score</th>
@@ -70,7 +70,7 @@ export default function LeaderboardPage() {
                       {leaderboardData.map((leaderboardUser, index) => (
                         <tr 
                           key={leaderboardUser.id} 
-                          className={`border-b hover:bg-gray-50 ${user && leaderboardUser.id === user.id ? 'bg-indigo-50' : ''}`}
+                          className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 ${user && leaderboardUser.id === user.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}
                         >
                           <td className="py-3 px-6">
                             {index === 0 ? (
@@ -86,7 +86,7 @@ export default function LeaderboardPage() {
                           <td className="py-3 px-6 font-medium">
                             {leaderboardUser.username}
                             {user && leaderboardUser.id === user.id && (
-                              <span className="ml-2 text-xs text-indigo-600 font-normal">(You)</span>
+                              <span className="ml-2 text-xs text-indigo-600 dark:text-indigo-400 font-normal">(You)</span>
                             )}
                           </td>
                           <td className="py-3 px-6 text-right font-bold">
@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                   No users have scored points yet. Be the first one!
                 </div>
               )}
@@ -119,4 +119,4 @@ export default function LeaderboardPage() {
       <Footer />
     </div>
   );
-} 
+}

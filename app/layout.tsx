@@ -7,16 +7,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
-   subsets: ["latin"],
-   display: 'swap',
-   variable: '--font-inter',
-  });
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "Clash of Aspirants",
   description: "An interactive quiz platform that leverages OpenAI to generate dynamic quiz questions.",
-  icons:{
-    icon:"/logo.svg",
+  icons: {
+    icon: "/logo.svg",
   }
 };
 
