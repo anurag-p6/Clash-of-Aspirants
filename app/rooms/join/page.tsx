@@ -71,7 +71,7 @@ export default function JoinRoomPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100">
+      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-black">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -81,14 +81,14 @@ export default function JoinRoomPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100">
+      <main className="flex-1 bg-slate-100 dark:bg-black">
         <div className="container mx-auto px-4 py-12">
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+          <div className="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-bold mb-6 text-center">Join a Quiz Room</h2>
             
             <form onSubmit={handleJoinRoom}>
               <div className="mb-6">
-                <label htmlFor="roomCode" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="roomCode" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Room Code
                 </label>
                 <input
@@ -97,22 +97,22 @@ export default function JoinRoomPage() {
                   placeholder="Enter the room code"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-800 dark:border-gray-600"
                   required
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Enter the room code shared by the room creator
                 </p>
               </div>
               
               {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md">
+                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md dark:bg-red-900/20 dark:text-red-400">
                   {error}
                 </div>
               )}
               
               <div className="flex items-center justify-between">
-                <Link href="/dashboard" className="text-indigo-600 hover:underline">
+                <Link href="/dashboard" className="text-indigo-600 hover:underline dark:text-indigo-400">
                   Back to Dashboard
                 </Link>
                 <button
@@ -136,4 +136,4 @@ export default function JoinRoomPage() {
       <Footer />
     </div>
   );
-} 
+}

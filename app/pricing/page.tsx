@@ -80,7 +80,7 @@ export default function PricingPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-4xl font-bold mb-4">AI Quiz Generation Plans</h1>
-              <p className="text-lg text-gray-500 max-w-3xl mx-auto">
+              <p className="text-lg text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
                 Unlock the power of AI to create engaging quizzes for education, training, or entertainment.
               </p>
             </div>
@@ -89,30 +89,30 @@ export default function PricingPage() {
               {pricingPlans.map((plan) => (
                 <div 
                   key={plan.id}
-                  className={`dark:bg-transparent bg-white rounded-lg shadow-md overflow-hidden border-2 transition-all ${
-                    selectedPlan === plan.id ? 'border-indigo-500' : 'border-white'
+                  className={`dark:bg-slate-900 bg-white rounded-lg shadow-md overflow-hidden border-2 transition-all ${
+                    selectedPlan === plan.id ? 'border-indigo-500' : 'border-transparent'
                   }`}
                 >
-                  <div className="p-6 border-b border-gray-100">
+                  <div className="p-6 border-b border-gray-100 dark:border-gray-800">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-2xl font-bold">{plan.name}</h2>
                       {plan.tagline && (
-                        <span className=" dark:from-bg-black dark:to-indigo-600 bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">
+                        <span className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 text-xs px-2 py-1 rounded font-medium">
                           {plan.tagline}
                         </span>
                       )}
                     </div>
                     <div className="mb-4">
                       <span className="text-3xl font-bold">{plan.price}</span>
-                      <span className="text-gray-500">{plan.period}</span>
+                      <span className="text-gray-500 dark:text-gray-400">{plan.period}</span>
                     </div>
-                    <p className="text-gray-500 text-sm mb-6">{plan.description}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{plan.description}</p>
                     <button 
                       onClick={() => setSelectedPlan(plan.id)}
                       className={`w-full py-2 rounded font-medium transition-colors ${
                         selectedPlan === plan.id 
-                          ? 'text-white hover: dark:from-bg-black dark:to-indigo-600 bg-indigo-700' 
-                          : 'border border-gray-300 text-gray-500 hover: dark:from-bg-black dark:to-indigo-600 bg-gray-50'
+                          ? 'text-white bg-indigo-600 hover:bg-indigo-700' 
+                          : 'border border-gray-300 text-gray-500 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-slate-800'
                       }`}
                     >
                       Select plan
@@ -127,14 +127,14 @@ export default function PricingPage() {
                             <Check size={20} />
                           </div>
                           <div className="ml-2">
-                            <p className="text-sm text-gray-500">{feature.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{feature.name}</p>
                           </div>
                         </div>
                       ))}
                     </div>
 
                     {plan.additionalFeatures.length > 0 && (
-                      <div className="mt-6 pt-6 border-t border-gray-100">
+                      <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
                         <p className="text-sm font-medium mb-4">Everything in {plan.id === 'scale' ? 'Launch' : plan.id === 'business' ? 'Scale' : 'Free'}, plus:</p>
                         <div className="space-y-4">
                           {plan.additionalFeatures.map((feature, index) => (
@@ -143,7 +143,7 @@ export default function PricingPage() {
                                 <Check size={20} />
                               </div>
                               <div className="ml-2">
-                                <p className="text-sm text-gray-500">{feature.name}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{feature.name}</p>
                               </div>
                             </div>
                           ))}
@@ -157,43 +157,43 @@ export default function PricingPage() {
 
             <div className="text-center mt-12">
               <h3 className="text-xl font-bold mb-4">Create Better Quizzes, Faster</h3>
-              <p className="text-gray-500 mb-6 max-w-3xl mx-auto">
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-3xl mx-auto">
                 Our AI-powered platform helps you create high-quality, educational quizzes in seconds.
                 Choose topics, set difficulty levels, and let our AI handle the rest. Perfect for classrooms,
                 training sessions, or competitive learning.
               </p>
               <Link
                 href={user ? '/rooms/create' : '/auth/register'}
-                className=" hover: dark:from-bg-black dark:to-indigo-600 bg-indigo-700 text-white px-8 py-3 rounded-md font-medium"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-md font-medium"
               >
                 {user ? 'Create Your First AI Quiz' : 'Sign Up & Start Creating'}
               </Link>
             </div>
 
-            <div className=" dark:bg-transparent border border-indigo-700 bg-white rounded-lg shadow-md p-8 mt-16">
+            <div className="dark:bg-slate-900 border border-indigo-700 bg-white rounded-lg shadow-md p-8 mt-16">
               <h3 className="text-xl font-bold mb-4">Frequently Asked Questions</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-bold mb-2">How accurate are the AI-generated quizzes?</h4>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
                     Our AI model is designed to create factually accurate quiz content. However, we recommend reviewing questions before using them in formal educational settings.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-bold mb-2">Can I customize the difficulty level?</h4>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
                     Yes, you can specify difficulty levels from beginner to expert when creating your quiz. The AI will adjust questions accordingly.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-bold mb-2">Do you offer discounts for educational institutions?</h4>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
                     Yes, we offer special pricing for K-12 schools, universities, and non-profit educational organizations. Contact us for details.
                   </p>
                 </div>
                 <div>
                   <h4 className="font-bold mb-2">What topics can the AI generate quizzes for?</h4>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
                     Our AI can generate quizzes on a wide range of academic subjects, including science, history, literature, mathematics, and more. We&apos;re constantly expanding our topic coverage.
                   </p>
                 </div>
@@ -206,4 +206,4 @@ export default function PricingPage() {
       <Footer />
     </div>
   );
-} 
+}

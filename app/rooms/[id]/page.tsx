@@ -471,7 +471,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
   if (loading || !user) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100">
+      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-black">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -479,7 +479,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex flex-col">
+      <div className="min-h-screen bg-slate-100 dark:bg-black flex flex-col">
         <header className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 py-6">
             <Link href="/dashboard" className="text-2xl font-bold">
@@ -499,7 +499,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-100 flex flex-col">
+      <div className="min-h-screen bg-slate-100 dark:bg-black flex flex-col">
         <header className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 py-6">
             <Link href="/dashboard" className="text-2xl font-bold">
@@ -508,8 +508,8 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
           </div>
         </header>
         <div className="flex-1 flex justify-center items-center">
-          <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center">
-            <p className="text-red-600 text-lg mb-4">{error}</p>
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-8 max-w-md w-full text-center">
+            <p className="text-red-600 dark:text-red-400 text-lg mb-4">{error}</p>
             <Link
               href="/dashboard"
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md inline-block"
@@ -523,7 +523,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-100 dark:bg-black flex flex-col">
       <header className="bg-slate-900 text-white">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <Link href="/dashboard" className="text-2xl font-bold">
@@ -555,15 +555,15 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
         {/* Quiz Section */}
         <div className="lg:col-span-3">
           {questions.length > 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">
                     Question {currentQuestionIndex + 1} of {questions.length}
                   </h2>
-                  <span className="text-gray-600">Topic: {room?.topic}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Topic: {room?.topic}</span>
                 </div>
-                <div className="h-2 bg-gray-200 rounded">
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded">
                   <div
                     className="h-full bg-indigo-600 rounded"
                     style={{
@@ -588,16 +588,16 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
                         selectedOption === index
                           ? correctOption !== null
                             ? index === correctOption
-                              ? 'bg-green-100 border-green-400'
-                              : 'bg-red-100 border-red-400'
-                            : 'bg-indigo-100 border-indigo-400'
+                              ? 'bg-green-100 border-green-400 dark:bg-green-900/30 dark:border-green-700'
+                              : 'bg-red-100 border-red-400 dark:bg-red-900/30 dark:border-red-700'
+                            : 'bg-indigo-100 border-indigo-400 dark:bg-indigo-900/30 dark:border-indigo-700'
                           : correctOption !== null && index === correctOption
-                          ? 'bg-green-100 border-green-400'
-                          : 'bg-white border-gray-300 hover:bg-gray-50'
+                          ? 'bg-green-100 border-green-400 dark:bg-green-900/30 dark:border-green-700'
+                          : 'bg-white border-gray-300 hover:bg-gray-50 dark:bg-slate-800 dark:border-gray-600 dark:hover:bg-slate-700'
                       } transition-colors`}
                     >
                       <div className="flex items-center">
-                        <span className="w-6 h-6 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-800 mr-3">
+                        <span className="w-6 h-6 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 mr-3">
                           {String.fromCharCode(65 + index)}
                         </span>
                         {option}
@@ -610,9 +610,9 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
               {isAnswered && (
                 <div className="mb-6">
                   {explanation && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                      <h4 className="font-medium text-blue-800 mb-2">Explanation:</h4>
-                      <p className="text-blue-700">{explanation}</p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 dark:bg-blue-900/20 dark:border-blue-800/50">
+                      <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Explanation:</h4>
+                      <p className="text-blue-700 dark:text-blue-400">{explanation}</p>
                     </div>
                   )}
 
@@ -627,8 +627,8 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
                   {currentQuestionIndex === questions.length - 1 && (
                     <div className="text-center py-4">
-                      <h3 className="text-xl font-bold text-green-600 mb-2">Quiz Completed!</h3>
-                      <p className="mb-4">You have completed the quiz. Check the leaderboard to see your ranking.</p>
+                      <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">Quiz Completed!</h3>
+                      <p className="mb-4 dark:text-gray-300">You have completed the quiz. Check the leaderboard to see your ranking.</p>
                       <Link
                         href="/dashboard"
                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md inline-block"
@@ -641,7 +641,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
               )}
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6 text-center">
               <p className="text-lg mb-4">No questions available for this quiz.</p>
               <Link
                 href="/dashboard"
@@ -655,7 +655,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
         {/* Leaderboard Section */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold mb-4">Leaderboard</h2>
             
             {participants.length > 0 ? (
@@ -667,8 +667,8 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
                       key={participant.id}
                       className={`flex items-center justify-between p-3 rounded ${
                         participant.userId === user?.id
-                          ? 'bg-indigo-50 border border-indigo-200'
-                          : 'bg-gray-50'
+                          ? 'bg-indigo-50 border border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-700'
+                          : 'bg-gray-50 dark:bg-slate-800'
                       }`}
                     >
                       <div className="flex items-center">
@@ -680,11 +680,11 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
                   ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">No participants yet</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-4">No participants yet</p>
             )}
           </div>
         </div>
       </main>
     </div>
   );
-} 
+}
