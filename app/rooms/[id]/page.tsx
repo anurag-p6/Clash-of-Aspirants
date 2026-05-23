@@ -471,7 +471,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
   if (loading || !user) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-black">
+      <div className="flex justify-center items-center min-h-screen bg-brand-gradient">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -479,7 +479,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-black flex flex-col">
+      <div className="min-h-screen bg-brand-gradient flex flex-col">
         <header className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 py-6">
             <Link href="/dashboard" className="text-2xl font-bold">
@@ -499,7 +499,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-100 dark:bg-black flex flex-col">
+      <div className="min-h-screen bg-brand-gradient flex flex-col">
         <header className="bg-slate-900 text-white">
           <div className="container mx-auto px-4 py-6">
             <Link href="/dashboard" className="text-2xl font-bold">
@@ -523,14 +523,14 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-black flex flex-col">
+    <div className="min-h-screen bg-brand-gradient flex flex-col">
       <header className="bg-slate-900 text-white">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <Link href="/dashboard" className="text-2xl font-bold">
             Clash of Aspirants
           </Link>
           <div className="flex items-center space-x-4">
-            <div className="bg-slate-800 px-3 py-2 rounded-md flex items-center">
+            <div className="flex items-center rounded-md bg-violet-900 px-3 py-2 text-white dark:bg-slate-800">
               <span className="text-sm text-slate-300 mr-2">Room Code:</span>
               <span className="font-medium text-white">{roomId}</span>
               <button

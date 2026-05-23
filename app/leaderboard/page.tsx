@@ -42,12 +42,12 @@ export default function LeaderboardPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100 dark:bg-black">
+      <main className="flex-1 bg-brand-gradient">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">Global Leaderboard</h1>
+            <h1 className="text-3xl font-bold mb-8 text-violet-950 dark:text-white">Global Leaderboard</h1>
             
-            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md overflow-hidden">
+            <div className="card-elevated overflow-hidden">
               <div className="px-6 py-4 bg-indigo-600 text-white">
                 <h2 className="text-xl font-bold">Top Scoring Users</h2>
               </div>
@@ -60,7 +60,7 @@ export default function LeaderboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gray-50 dark:bg-slate-800 border-b dark:border-gray-700">
+                      <tr className="border-b border-violet-200/80 bg-violet-50/80 dark:border-gray-700 dark:bg-slate-800">
                         <th className="py-3 px-6 text-left">Rank</th>
                         <th className="py-3 px-6 text-left">User</th>
                         <th className="py-3 px-6 text-right">Score</th>

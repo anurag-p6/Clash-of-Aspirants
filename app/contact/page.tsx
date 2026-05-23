@@ -78,15 +78,15 @@ export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen relative">
       <MainNav />
-      <main className="flex-1 bg-slate-100 dark:bg-black px-4 sm:px-6 lg:px-8 py-12 z-10">
+      <main className="flex-1 bg-brand-gradient px-4 sm:px-6 lg:px-8 py-12 z-10">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">Contact Us</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center text-violet-950 dark:text-white">Contact Us</h1>
           {submitSuccess ? (
             <div className="bg-green-100 border border-green-400 text-green-700 dark:bg-green-900/20 dark:border-green-800/50 dark:text-green-400 px-4 py-3 rounded relative mb-6">
               <strong className="font-bold">Thank you!</strong> Your message has been sent.
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6 sm:p-8">
+            <div className="card-elevated p-6 sm:p-8">
               <p className="text-gray-700 dark:text-gray-300 mb-6 text-center">Have questions? Reach out to us!</p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <input type="text" name="name" placeholder="Your name" value={formData.name} onChange={handleChange} className={`w-full p-3 border rounded-md ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-slate-800`} />
