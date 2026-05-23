@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
+import { resolveDatabaseUserId } from '@/lib/users';
 
 // GET: Fetch all active quiz rooms
 export async function GET() {
@@ -126,20 +127,31 @@ export async function POST(req: NextRequest) {
       );
     }
     try {
+      const databaseUserId = await resolveDatabaseUserId(creatorId);
+      if (!databaseUserId) {
+        return NextResponse.json(
+          {
+            error:
+              "User account not found. Please sign out, sign in again, and try creating the room.",
+          },
+          { status: 400 }
+        );
+      }
+
       // Create a new quiz room
       const room = await prisma.quizRoom.create({
         data: {
           name,
           topic,
           difficulty,
-          creatorId,
+          creatorId: databaseUserId,
         },
       });
 
       // Add the creator as a participant
       await prisma.roomParticipant.create({
         data: {
-          userId: creatorId,
+          userId: databaseUserId,
           roomId: room.id,
         },
       });

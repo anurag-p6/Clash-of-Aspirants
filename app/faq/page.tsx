@@ -64,10 +64,10 @@ export default function FaqPage() {
     <div className="flex flex-col min-h-screen relative">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100 dark:bg-black z-10">
+      <main className="flex-1 bg-brand-gradient z-10">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold mb-6">Frequently Asked Questions</h1>
+            <h1 className="text-4xl font-bold mb-6 text-violet-950 dark:text-white">Frequently Asked Questions</h1>
             <p className="text-gray-700 dark:text-gray-300 mb-8">
               Find answers to the most common questions about Clash of Aspirants. If you can&apos;t find what you&apos;re looking for, please visit our{' '}
               <Link href="/contact" className="text-indigo-600 hover:underline dark:text-indigo-400 dark:hover:underline">Contact page</Link> to reach out to our support team.
@@ -77,7 +77,7 @@ export default function FaqPage() {
               {faqItems.map((faq, index) => (
                 <div 
                   key={index} 
-                  className="bg-white dark:bg-slate-900 rounded-lg shadow-md overflow-hidden"
+                  className="card-elevated overflow-hidden"
                 >
                   <button
                     className="w-full text-left p-4 flex justify-between items-center focus:outline-none"

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveDatabaseUserId } from '@/lib/users';
 
 // POST: Submit an answer to a question
 export async function POST(req: NextRequest) {
@@ -16,11 +17,19 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    const { userId, questionId, selectedOption } = requestData;
+    const { userId: rawUserId, questionId, selectedOption } = requestData;
 
-    if (!userId || !questionId || selectedOption === undefined) {
+    if (!rawUserId || !questionId || selectedOption === undefined) {
       return NextResponse.json(
         { error: 'User ID, question ID, and selected option are required' },
+        { status: 400 }
+      );
+    }
+
+    const userId = await resolveDatabaseUserId(rawUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User account not found. Please sign in again.' },
         { status: 400 }
       );
     }

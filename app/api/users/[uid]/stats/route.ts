@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveDatabaseUserId } from '@/lib/users';
 
 
 
@@ -19,10 +20,18 @@ export async function GET(
     }
 
     try {
+      const databaseUserId = await resolveDatabaseUserId(uid);
+      if (!databaseUserId) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+
       // Get the user to verify they exist
       const user = await prisma.user.findUnique({
         where: {
-          id: uid,
+          id: databaseUserId,
         },
         select: {
           id: true,
@@ -40,18 +49,18 @@ export async function GET(
       // Get count of quizzes created by this user
       const quizzesCreated = await prisma.quizRoom.count({
         where: {
-          creatorId: uid,
+          creatorId: databaseUserId,
         },
       });
 
       // Get count of quizzes joined by this user
       const quizzesJoined = await prisma.roomParticipant.count({
         where: {
-          userId: uid,
+          userId: databaseUserId,
           // Exclude rooms created by the user
           room: {
             creatorId: {
-              not: uid,
+              not: databaseUserId,
             },
           },
         },
@@ -60,14 +69,14 @@ export async function GET(
       // Get counts of correct and incorrect answers
       const correctAnswers = await prisma.answer.count({
         where: {
-          userId: uid,
+          userId: databaseUserId,
           isCorrect: true,
         },
       });
 
       const incorrectAnswers = await prisma.answer.count({
         where: {
-          userId: uid,
+          userId: databaseUserId,
           isCorrect: false,
         },
       });

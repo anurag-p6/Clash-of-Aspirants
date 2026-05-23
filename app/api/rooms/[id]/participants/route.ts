@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveDatabaseUserId } from '@/lib/users';
 
 // GET: Fetch all participants for a room
 export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -77,12 +78,20 @@ export async function POST(_req: NextRequest,{ params }: { params: Promise<{ id:
       );
     }
 
-    const { userId } = requestBody;
+    const { userId: rawUserId } = requestBody;
 
-    if (!userId || typeof userId !== 'string') {
-      console.error('Invalid User ID:', userId);
+    if (!rawUserId || typeof rawUserId !== 'string') {
+      console.error('Invalid User ID:', rawUserId);
       return NextResponse.json(
         { error: 'Valid User ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const userId = await resolveDatabaseUserId(rawUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User account not found. Please sign in again.' },
         { status: 400 }
       );
     }

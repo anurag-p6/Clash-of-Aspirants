@@ -57,19 +57,19 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b dark:from-black via-black to-[#200559] bg-slate-100">
+      <div className="flex justify-center items-center min-h-screen bg-brand-gradient">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center content-between bg-gradient-to-b dark:from-black dark:via-black dark:to-[#200559] bg-slate-100 px-6 py-8 relative">
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center content-between bg-brand-gradient px-6 py-8 relative">
       <div className="hidden md:block md:w-1/2 ">
         <BearAnimation />
       </div>
       
-      <div className="w-full max-w-sm md:max-w-md lg:max-w-lg dark:bg-slate-900 border dark:border-indigo-600 bg-white p-6 md:p-8 rounded-lg shadow-lg ">
+      <div className="card-elevated w-full max-w-sm md:max-w-md lg:max-w-lg p-6 md:p-8 shadow-lg">
         <div className="text-center">
           <h1 className="text-2xl md:text-3xl font-bold">Sign In</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm md:text-base">Welcome back to Clash of Aspirants!</p>

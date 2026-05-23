@@ -7,12 +7,12 @@ export default function AboutPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1  bg-gradient-to-b dark:from-black dark:via-black dark:to-[#200559] bg-slate-100">
+      <main className="flex-1 bg-brand-gradient">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl font-bold mb-6">About Clash of Aspirants</h1>
+            <h1 className="text-4xl font-bold mb-6 text-violet-950 dark:text-white">About Clash of Aspirants</h1>
             
-            <div className="bg-white dark:bg-slate-900 border dark:border-indigo-600 rounded-lg shadow-md p-8 mb-8">
+            <div className="card-elevated p-8 mb-8">
               <h2 className="text-2xl font-bold mb-4">What is Clash of Aspirants?</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Clash of Aspirants is an interactive quiz platform that leverages OpenAI powerful language models to generate dynamic quiz questions based on user prompts. Whether you&apos;re a student studying for exams, a teacher looking to engage your class, or just someone who enjoys testing their knowledge, our platform provides a fun and competitive environment for learning.
@@ -39,7 +39,7 @@ export default function AboutPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-              <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
+              <div className="card-elevated p-6">
                 <h3 className="text-xl font-bold mb-3">Key Features</h3>
                 <ul className="space-y-2 text-gray-700 dark:text-gray-300">
                   <li className="flex items-start">
@@ -69,7 +69,7 @@ export default function AboutPage() {
                 </ul>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
+              <div className="card-elevated p-6">
                 <h3 className="text-xl font-bold mb-3">Technology Stack</h3>
                 <ul className="space-y-2 text-gray-700 dark:text-gray-300">
                   <li className="flex items-start">

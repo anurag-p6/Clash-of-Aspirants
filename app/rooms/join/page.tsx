@@ -71,7 +71,7 @@ export default function JoinRoomPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-black">
+      <div className="flex justify-center items-center min-h-screen bg-brand-gradient">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -81,9 +81,9 @@ export default function JoinRoomPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100 dark:bg-black">
+      <main className="flex-1 bg-brand-gradient">
         <div className="container mx-auto px-4 py-12">
-          <div className="max-w-md mx-auto bg-white dark:bg-slate-900 rounded-lg shadow-md p-8">
+          <div className="card-elevated max-w-md mx-auto p-8">
             <h2 className="text-2xl font-bold mb-6 text-center">Join a Quiz Room</h2>
             
             <form onSubmit={handleJoinRoom}>
