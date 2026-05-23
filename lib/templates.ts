@@ -1,6 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { generateQuizQuestions, QuizQuestion } from "@/lib/openai";
 
+const MOCK_QUESTION_MARKERS = [
+  "assassination of Archduke Franz Ferdinand",
+  "chemical symbol for gold",
+  "capital of Japan",
+];
+
+function isMockTemplate(questions: { content: string }[]): boolean {
+  return questions.some((q) =>
+    MOCK_QUESTION_MARKERS.some((marker) => q.content.includes(marker))
+  );
+}
+
 /**
  * Create a new quiz template in the database
  */
@@ -25,6 +37,7 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
     const template = await prisma.quizTemplate.create({
       data: {
         topic,
+        difficulty,
         questions: {
           create: questions.map(q => {
             // Ensure JSON is properly handled
@@ -63,22 +76,21 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
  */
 export async function generateAndStoreQuizTemplate(topic: string, numQuestions: number = 5, difficulty: string) {
   try {
-    // Check if a template for this topic already exists
+    // Reuse a cached template only when topic, difficulty, and question count match
     const existingTemplate = await prisma.quizTemplate.findFirst({
       where: {
-        topic: {
-          equals: topic,
-          mode: "insensitive"
-        },
-        
+        topic: { equals: topic, mode: "insensitive" },
+        difficulty,
       },
-      include: {
-        questions: true
-      }
+      include: { questions: true },
+      orderBy: { createdAt: "desc" },
     });
-    
-    // If template exists and has enough questions, return it
-    if (existingTemplate && existingTemplate.questions.length >= numQuestions) {
+
+    if (
+      existingTemplate &&
+      existingTemplate.questions.length >= numQuestions &&
+      !isMockTemplate(existingTemplate.questions)
+    ) {
       return existingTemplate;
     }
     

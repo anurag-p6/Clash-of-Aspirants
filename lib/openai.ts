@@ -1,5 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 export interface QuizQuestion {
   question: string;
   options: string[];
@@ -7,9 +5,127 @@ export interface QuizQuestion {
   explanation: string;
 }
 
-// ✅ Initialize Gemini AI with API Key
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+function trimEnv(value: string | undefined): string {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function getCloudflareConfig() {
+  return {
+    apiKey: trimEnv(
+      process.env.CLOUDFLARE_API_TOKEN ||
+        process.env.CLOUDFLARE_API_KEY ||
+        process.env.NEXT_PUBLIC_CLOUDFLARE_API_KEY
+    ),
+    accountId: trimEnv(
+      process.env.CLOUDFLARE_ACCOUNT_ID || process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_ID
+    ),
+  };
+}
+
+function formatCloudflareError(status: number, body: string): string {
+  if (status === 401) {
+    return (
+      "Cloudflare authentication failed for Workers AI. Your API token is valid for the account " +
+      "but does not include Workers AI permissions. In the Cloudflare dashboard go to Workers AI → " +
+      "Use REST API → Create a Workers AI API Token (needs Workers AI Read and Edit). " +
+      "Update CLOUDFLARE_API_TOKEN in .env and restart the dev server."
+    );
+  }
+  return `Cloudflare AI API error: ${status} ${body}`;
+}
+
+/** Extract assistant text from Workers AI REST responses (legacy + chat completions). */
+function extractTextFromCloudflareResponse(data: unknown): string {
+  const payload = data as {
+    result?: {
+      response?: string;
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+
+  const result = payload?.result;
+  if (typeof result?.response === "string" && result.response.length > 0) {
+    return result.response;
+  }
+
+  const choiceContent = result?.choices?.[0]?.message?.content ?? payload?.choices?.[0]?.message?.content;
+  if (typeof choiceContent === "string") {
+    return choiceContent;
+  }
+
+  return "";
+}
+
+/** Pull a JSON array of questions out of model text (markdown fences, wrappers, etc.). */
+function parseQuestionsJson(text: string): QuizQuestion[] {
+  let cleaned = text.trim();
+  if (cleaned.includes("```")) {
+    cleaned = cleaned.replace(/```json\s?/gi, "").replace(/```\s?/g, "").trim();
+  }
+
+  const tryParse = (raw: string): QuizQuestion[] | null => {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && Array.isArray(parsed.questions)) return parsed.questions;
+    return null;
+  };
+
+  try {
+    const direct = tryParse(cleaned);
+    if (direct) return direct;
+  } catch {
+    // fall through to bracket extraction
+  }
+
+  const start = cleaned.indexOf("[");
+  const end = cleaned.lastIndexOf("]");
+  if (start !== -1 && end > start) {
+    const slice = cleaned.slice(start, end + 1);
+    const extracted = tryParse(slice);
+    if (extracted) return extracted;
+  }
+
+  const objStart = cleaned.indexOf("{");
+  const objEnd = cleaned.lastIndexOf("}");
+  if (objStart !== -1 && objEnd > objStart) {
+    const extracted = tryParse(cleaned.slice(objStart, objEnd + 1));
+    if (extracted) return extracted;
+  }
+
+  throw new Error("Response is not a valid JSON array of questions");
+}
+
+function normalizeQuestions(questions: QuizQuestion[], topic: string): QuizQuestion[] {
+  return questions.map((q, index) => {
+    if (
+      !q.question ||
+      !Array.isArray(q.options) ||
+      q.options.length < 2 ||
+      typeof q.correctOptionIndex !== "number" ||
+      !q.explanation
+    ) {
+      return {
+        question: q.question || `Question ${index + 1} about ${topic}`,
+        options:
+          Array.isArray(q.options) && q.options.length >= 2
+            ? q.options
+            : ["Option A", "Option B", "Option C", "Option D"],
+        correctOptionIndex: typeof q.correctOptionIndex === "number" ? q.correctOptionIndex : 0,
+        explanation: q.explanation || "This is the correct answer.",
+      };
+    }
+    return q;
+  });
+}
 
 /**
  * Generate mock questions for development without an API key
@@ -58,78 +174,64 @@ function generateMockQuestions(topic: string, numQuestions: number): QuizQuestio
 }
 
 /**
- * Generate quiz questions using Gemini API
+ * Generate quiz questions using Cloudflare Workers AI (Kimi)
  */
 export async function generateQuizQuestions(topic: string, numQuestions: number = 5, difficulty: string): Promise<QuizQuestion[]> {
-  if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY && !process.env.GEMINI_API_KEY) {
-    console.log("⚠️ No valid Gemini API key found. Using mock questions.");
+  const { apiKey, accountId } = getCloudflareConfig();
+
+  if (!apiKey || !accountId) {
+    console.log("⚠️ No valid Cloudflare API key or account ID found. Using mock questions.");
     return generateMockQuestions(topic, numQuestions);
   }
 
-  try {
-    const prompt = `
-      Generate exactly ${numQuestions} multiple-choice quiz questions on the topic "${topic}" with a difficulty level of "${difficulty}". Ensure the questions are clear, well-structured,not repeated, and appropriate for the given difficulty.
-      Format the response as a raw JSON array (without code blocks, markdown, or any other formatting):
-      [
-      {
-      "question": "Text of the question",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctOptionIndex": <index of the correct option (0-3)>,
-      "explanation": "Brief reason why this answer is correct"
+  const prompt = `Generate exactly ${numQuestions} multiple-choice quiz questions on the topic "${topic}" with difficulty "${difficulty}". Questions must be clear, unique, and match the difficulty.
+Return ONLY a JSON object with this shape (no markdown, no code fences):
+{"questions":[{"question":"...","options":["A","B","C","D"],"correctOptionIndex":0,"explanation":"..."}]}`;
+
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/moonshotai/kimi-k2.6`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-      ... (remaining questions)
-      ]
-    `;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response.text();
-
-    // Clean up the response to handle markdown code blocks
-    let cleanedResponse = response;
-    // Remove markdown code blocks if present
-    if (response.includes("```")) {
-      cleanedResponse = response.replace(/```json\s?/g, "").replace(/```\s?/g, "");
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "system",
+            content: "You are a quiz generator. Output only valid JSON matching the requested schema.",
+          },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 4096,
+      }),
     }
+  );
 
-    // Remove any leading/trailing whitespace
-    cleanedResponse = cleanedResponse.trim();
+  const responseBody = await response.text();
 
-    // Ensure the response starts with [ and ends with ]
-    if (!cleanedResponse.startsWith("[") || !cleanedResponse.endsWith("]")) {
-      throw new Error("Response is not a valid JSON array");
-    }
-
-    console.log("Cleaned response:", cleanedResponse);
-
-    try {
-      const parsedResponse = JSON.parse(cleanedResponse);
-
-      if (Array.isArray(parsedResponse)) {
-        // Validate the structure of each question
-        const validatedQuestions = parsedResponse.map((q, index) => {
-          if (!q.question || !Array.isArray(q.options) || q.options.length < 2 ||
-            typeof q.correctOptionIndex !== 'number' || !q.explanation) {
-            // Fix malformed questions with minimal data
-            return {
-              question: q.question || `Question ${index + 1} about ${topic}`,
-              options: Array.isArray(q.options) && q.options.length >= 2 ? q.options : ["Option A", "Option B", "Option C", "Option D"],
-              correctOptionIndex: typeof q.correctOptionIndex === 'number' ? q.correctOptionIndex : 0,
-              explanation: q.explanation || "This is the correct answer."
-            };
-          }
-          return q;
-        });
-
-        return validatedQuestions;
-      }
-      throw new Error("Invalid JSON format received from Gemini API");
-    } catch (parseError) {
-      console.error("JSON parsing error:", parseError);
-      throw new Error("Failed to parse Gemini API response as JSON");
-    }
-  } catch (error) {
-    console.error("❌ Gemini API Error:", error);
-    console.log("⚠️ Falling back to mock questions.");
-    return generateMockQuestions(topic, numQuestions);
+  if (!response.ok) {
+    throw new Error(formatCloudflareError(response.status, responseBody));
   }
+
+  const data = JSON.parse(responseBody);
+
+  if (data.success === false) {
+    const errors = data.errors?.map((e: { message?: string }) => e.message).join("; ") ?? "Unknown error";
+    if (data.errors?.some((e: { code?: number }) => e.code === 10000)) {
+      throw new Error(formatCloudflareError(401, responseBody));
+    }
+    throw new Error(`Cloudflare AI API error: ${errors}`);
+  }
+
+  const text = extractTextFromCloudflareResponse(data);
+  if (!text) {
+    console.error("Unexpected Cloudflare response shape:", JSON.stringify(data).slice(0, 500));
+    throw new Error("Cloudflare AI returned no text content");
+  }
+
+  const parsed = parseQuestionsJson(text);
+  return normalizeQuestions(parsed, topic);
 }
