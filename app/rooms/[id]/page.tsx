@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useSocket } from '@/lib/socket-context';
+import { formatQuestionForClient } from '@/lib/quiz-utils';
 
 interface Participant {
   id: string;
@@ -22,6 +23,14 @@ interface Question {
   options: string[];
   correctOption?: number; // Only revealed after answering
   explanation?: string; // Only revealed after answering
+}
+
+interface SavedAnswer {
+  questionId: string;
+  selectedOption: number;
+  isCorrect: boolean;
+  correctOption: number;
+  explanation: string | null;
 }
 
 interface Room {
@@ -58,6 +67,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [savedAnswers, setSavedAnswers] = useState<Record<string, SavedAnswer>>({});
 
   // Check if user is authenticated
   useEffect(() => {
@@ -89,13 +99,14 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
   useEffect(() => {
     if (!socket || !connected) return;
 
-    // Listen for when a user answers a question
-    socket.on('user-answered', (data) => {
-      // Update participants list with new scores
-      setParticipants((prev) => 
-        prev.map((p) => 
-          p.userId === data.userId 
-            ? { ...p, score: p.score + (data.isCorrect ? 1 : 0) } 
+    socket.on('user-answered', (data: { userId: string; questionId: string; isCorrect: boolean }) => {
+      // Only update other players — our score comes from the API
+      if (!user || data.userId === user.id) return;
+
+      setParticipants((prev) =>
+        prev.map((p) =>
+          p.userId === data.userId
+            ? { ...p, score: p.score + (data.isCorrect ? 1 : 0) }
             : p
         )
       );
@@ -103,7 +114,7 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
 
     // Listen for new questions
     socket.on('new-question', (question) => {
-      setQuestions((prev) => [...prev, question]);
+      setQuestions((prev) => [...prev, formatQuestionForClient(question)]);
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
@@ -119,7 +130,46 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
       socket.off('new-question');
       socket.off('leaderboard-updated');
     };
-  }, [socket, connected]);
+  }, [socket, connected, user?.id]);
+
+  const applySavedAnswerToUi = (answer: SavedAnswer) => {
+    setSelectedOption(answer.selectedOption);
+    setCorrectOption(answer.correctOption);
+    setExplanation(answer.explanation);
+    setIsAnswered(true);
+  };
+
+  const restoreProgress = (
+    questionList: Question[],
+    answers: SavedAnswer[]
+  ) => {
+    const byQuestion: Record<string, SavedAnswer> = {};
+    for (const a of answers) {
+      byQuestion[a.questionId] = a;
+    }
+    setSavedAnswers(byQuestion);
+
+    let startIndex = 0;
+    for (let i = 0; i < questionList.length; i++) {
+      if (!byQuestion[questionList[i].id]) {
+        startIndex = i;
+        break;
+      }
+      startIndex = i;
+    }
+
+    setCurrentQuestionIndex(startIndex);
+    const current = questionList[startIndex];
+    const saved = current ? byQuestion[current.id] : undefined;
+    if (saved) {
+      applySavedAnswerToUi(saved);
+    } else {
+      setSelectedOption(null);
+      setIsAnswered(false);
+      setCorrectOption(null);
+      setExplanation(null);
+    }
+  };
 
   // Fetch room details
   const fetchRoomDetails = async () => {
@@ -264,7 +314,26 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
           };
         }
       }
-      setQuestions(questionsData.questions);
+      const normalizedQuestions = (questionsData.questions ?? []).map(
+        (q: { id: string; content: string; options: unknown; createdAt?: string }) =>
+          formatQuestionForClient(q)
+      );
+      setQuestions(normalizedQuestions);
+
+      if (user?.id && normalizedQuestions.length > 0) {
+        try {
+          const progressRes = await fetch(
+            `/api/rooms/${roomId}/progress?userId=${encodeURIComponent(user.id)}`,
+            { cache: "no-store" }
+          );
+          if (progressRes.ok) {
+            const progressData = await progressRes.json();
+            restoreProgress(normalizedQuestions, progressData.answers ?? []);
+          }
+        } catch (progressErr) {
+          console.error("Error loading quiz progress:", progressErr);
+        }
+      }
       
       // Fetch participants
       const participantsResponse = await fetch(`/api/rooms/${roomId}/participants`);
@@ -377,91 +446,93 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
     }
   };
 
-  // Handle answering a question
-  const handleAnswer = async (optionIndex: number) => {
-    if (isAnswered || !user || !roomId || questions.length === 0) return;
-    
-    setSelectedOption(optionIndex);
-    setIsAnswered(true);
-    
+  const refreshParticipants = async () => {
     try {
-      const currentQuestion = questions[currentQuestionIndex];
-      
-      // First try the API endpoint
-      try {
-        const response = await fetch('/api/answers', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            questionId: currentQuestion.id,
-            selectedOption: optionIndex,
-          }),
-          // Add cache control to prevent issues
-          cache: 'no-store'
-        });
-        
-        if (response.ok) {
-          let data;
-          try {
-            data = await response.json();
-            setCorrectOption(data.correctOption);
-            setExplanation(data.explanation);
-            
-            // Emit socket event to update other participants
-            submitAnswer({
-              roomId,
-              userId: user.id,
-              questionId: currentQuestion.id,
-              answer: optionIndex,
-              isCorrect: data.isCorrect,
-            });
-            
-            return; // Exit early if API call succeeds
-          } catch (jsonError) {
-            console.error('Error parsing answer response JSON:', jsonError);
-            // Continue to fallback
-          }
-        } else {
-          console.error('Answer submission failed with status:', response.status);
-          // Continue to fallback
-        }
-      } catch (apiError) {
-        console.error('API error during answer submission:', apiError);
-        // Continue to fallback
+      const res = await fetch(`/api/rooms/${roomId}/participants`, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setParticipants(data.participants ?? []);
       }
-      
-      // FALLBACK: Generate mock answer data if API call fails
-      console.log('Using mock answer data since the API endpoint failed');
-      
-      // In development, make the answer correct for testing
-      // In a real app, we would use the actual correctOption from the question
-      const mockCorrectOption = optionIndex;
-      const mockIsCorrect = true;
-      
-      setCorrectOption(mockCorrectOption);
-      setExplanation("This is a mock explanation because the API endpoint is unavailable. In a real app, this would be the actual explanation for the correct answer.");
-      
-      // Still emit socket event with mock data
-      submitAnswer({
-        roomId,
-        userId: user.id,
-        questionId: currentQuestion.id,
-        answer: optionIndex,
-        isCorrect: mockIsCorrect,
-      });
-      
     } catch (err) {
-      console.error('Error submitting answer:', err as Error);
+      console.error("Error refreshing participants:", err);
     }
   };
 
-  // Handle going to the next question
+  // Handle answering a question
+  const handleAnswer = async (optionIndex: number) => {
+    if (isAnswered || !user || !roomId || questions.length === 0) return;
+
+    const currentQuestion = questions[currentQuestionIndex];
+    const prior = savedAnswers[currentQuestion.id];
+    if (prior) {
+      applySavedAnswerToUi(prior);
+      return;
+    }
+
+    setSelectedOption(optionIndex);
+    setIsAnswered(true);
+
+    try {
+      const response = await fetch("/api/answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          questionId: currentQuestion.id,
+          selectedOption: optionIndex,
+        }),
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setIsAnswered(false);
+        setSelectedOption(null);
+        console.error("Answer submission failed:", response.status);
+        return;
+      }
+
+      const data = await response.json();
+      setCorrectOption(data.correctOption);
+      setExplanation(data.explanation);
+
+      const saved: SavedAnswer = {
+        questionId: currentQuestion.id,
+        selectedOption: optionIndex,
+        isCorrect: data.isCorrect,
+        correctOption: data.correctOption,
+        explanation: data.explanation ?? null,
+      };
+      setSavedAnswers((prev) => ({ ...prev, [currentQuestion.id]: saved }));
+
+      await refreshParticipants();
+
+      if (!data.alreadyAnswered) {
+        submitAnswer({
+          roomId,
+          userId: user.id,
+          questionId: currentQuestion.id,
+          answer: optionIndex,
+          isCorrect: data.isCorrect,
+        });
+      }
+    } catch (err) {
+      setIsAnswered(false);
+      setSelectedOption(null);
+      console.error("Error submitting answer:", err);
+    }
+  };
+
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (currentQuestionIndex >= questions.length - 1) return;
+
+    const nextIndex = currentQuestionIndex + 1;
+    const nextQuestion = questions[nextIndex];
+    const saved = savedAnswers[nextQuestion.id];
+
+    setCurrentQuestionIndex(nextIndex);
+    if (saved) {
+      applySavedAnswerToUi(saved);
+    } else {
       setSelectedOption(null);
       setIsAnswered(false);
       setCorrectOption(null);
@@ -579,7 +650,12 @@ export default function RoomPage({ params }: { params: Promise<PageParams> }) {
                 </h3>
 
                 <div className="space-y-3">
-                  {questions[currentQuestionIndex]?.options.map((option, index) => (
+                  {(questions[currentQuestionIndex]?.options ?? []).length === 0 && (
+                    <p className="text-amber-700 dark:text-amber-400 text-sm">
+                      No answer choices loaded for this question. Refresh the page or recreate the room.
+                    </p>
+                  )}
+                  {(questions[currentQuestionIndex]?.options ?? []).map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleAnswer(index)}

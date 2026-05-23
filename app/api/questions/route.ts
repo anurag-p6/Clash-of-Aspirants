@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateQuizQuestions } from '@/lib/openai';
 import { prisma } from '@/lib/prisma';
 import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
+import { formatQuestionForClient, normalizeOptions, stripQuestionNumberPrefix } from '@/lib/quiz-utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,34 +56,27 @@ export async function POST(req: NextRequest) {
       // If we need more questions than we have in the template, limit to what we have
       const questionsToUse = templateQuestions.slice(0, numQuestions);
       
-      // Create questions in the room based on template questions
-      const questions = await Promise.all(
-        questionsToUse.map(async (q: TemplateQuestion) => {
-          // Ensure options is properly formatted for database
-          let processedOptions;
-          try {
-            // Make sure options is properly serialized
-            processedOptions = typeof q.options === 'string' 
-              ? JSON.parse(q.options) 
-              : q.options;
-          } catch (e) {
-            console.error("Error processing options:", e);
-            processedOptions = ["Option A", "Option B", "Option C", "Option D"];
-          }
-          
-          return prisma.question.create({
-            data: {
-              roomId,
-              content: q.content,
-              options: processedOptions,
-              correctOption: q.correctOption,
-              explanation: q.explanation,
-            },
-          });
-        })
-      );
+      const createdQuestions = [];
+      for (const q of questionsToUse) {
+        const processedOptions = normalizeOptions(q.options);
+        const created = await prisma.question.create({
+          data: {
+            roomId,
+            content: stripQuestionNumberPrefix(q.content),
+            options:
+              processedOptions.length >= 2
+                ? processedOptions
+                : ["Option A", "Option B", "Option C", "Option D"],
+            correctOption: q.correctOption,
+            explanation: q.explanation,
+          },
+        });
+        createdQuestions.push(created);
+      }
 
-      return NextResponse.json({ questions });
+      return NextResponse.json({
+        questions: createdQuestions.map(formatQuestionForClient),
+      });
     } catch (dbError) {
       console.error('Database error storing questions:', dbError);
       

@@ -25,27 +25,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ user });
       } catch (dbError) {
         console.error('Database error finding user by Firebase UID:', dbError);
-        
-        if (process.env.NODE_ENV === 'production') {
-          return NextResponse.json(
-            { error: 'Database error finding user' },
-            { status: 500 }
-          );
-        }
-        
-        // Create a dummy user for development when DB isn't available
-        const dummyUser = {
-          id: firebaseUid,
-          firebaseUid,
-          email: `user-${firebaseUid.substring(0, 5)}@example.com`,
-          username: `User-${firebaseUid.substring(0, 5)}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          score: 0
-        };
-        
-        console.log('Returning dummy user for development:', dummyUser);
-        return NextResponse.json({ user: dummyUser });
+        return NextResponse.json(
+          { error: 'Database error finding user' },
+          { status: 500 }
+        );
       }
     }
 

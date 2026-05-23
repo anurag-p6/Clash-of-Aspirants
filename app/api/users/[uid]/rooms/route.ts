@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveDatabaseUserId } from '@/lib/users';
 
 
 // GET: Fetch rooms created by a user
@@ -18,12 +19,20 @@ export async function GET(
     }
 
     try {
-      console.log(`Fetching rooms for user ID: ${uid}`);
-      
+      const databaseUserId = await resolveDatabaseUserId(uid);
+      if (!databaseUserId) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+
+      console.log(`Fetching rooms for user ID: ${databaseUserId}`);
+
       // Get the rooms created by this user
       const rooms = await prisma.quizRoom.findMany({
         where: {
-          creatorId: uid,
+          creatorId: databaseUserId,
         },
         include: {
           creator: {

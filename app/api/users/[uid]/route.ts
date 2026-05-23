@@ -27,27 +27,10 @@ export async function GET(
       return NextResponse.json({ user });
     } catch (dbError) {
       console.error('Database error:', dbError);
-      
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json(
-          { error: 'Database error fetching user' },
-          { status: 500 }
-        );
-      }
-      
-      // Create a dummy user for development when DB isn't available
-      const dummyUser = {
-        id: uid,
-        firebaseUid: uid,
-        email: `user-${uid.substring(0, 5)}@example.com`,
-        username: `User-${uid.substring(0, 5)}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        score: 0
-      };
-      
-      console.log('Returning dummy user for development:', dummyUser);
-      return NextResponse.json({ user: dummyUser });
+      return NextResponse.json(
+        { error: 'Database error fetching user' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error fetching user:', error);

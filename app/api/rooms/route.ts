@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateAndStoreQuizTemplate, TemplateQuestion } from '@/lib/templates';
+import { generateQuestionsForRoom } from '@/lib/templates';
+import { resolveDatabaseUserId } from '@/lib/users';
+import { normalizeOptions, stripQuestionNumberPrefix } from '@/lib/quiz-utils';
 
 // GET: Fetch all active quiz rooms
 export async function GET() {
@@ -126,76 +128,59 @@ export async function POST(req: NextRequest) {
       );
     }
     try {
-      // Create a new quiz room
+      const databaseUserId = await resolveDatabaseUserId(creatorId);
+      if (!databaseUserId) {
+        return NextResponse.json(
+          {
+            error:
+              "User account not found. Please sign out, sign in again, and try creating the room.",
+          },
+          { status: 400 }
+        );
+      }
+
+      console.log("Generating fresh questions for room, topic:", topic);
+      const aiQuestions = await generateQuestionsForRoom(topic, numQuestions, difficulty);
+
+      if (aiQuestions.length === 0) {
+        return NextResponse.json(
+          { error: "No quiz questions were generated. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      console.log("Generated", aiQuestions.length, "unique questions for this room");
+
       const room = await prisma.quizRoom.create({
         data: {
           name,
           topic,
           difficulty,
-          creatorId,
+          creatorId: databaseUserId,
         },
       });
 
-      // Add the creator as a participant
       await prisma.roomParticipant.create({
         data: {
-          userId: creatorId,
+          userId: databaseUserId,
           roomId: room.id,
         },
       });
 
-      console.log("Room and participant created successfully, attempting to create template...");
-      
-      // Find or generate a quiz template for this topic
-      const template = await generateAndStoreQuizTemplate(topic, numQuestions, difficulty);
-      
-      console.log("Template created/found:", template.id, "with", template.questions.length, "questions");
-      
-      console.log(`Creating room with ${numQuestions} questions from template`);
-      
-      // Get the questions from the template
-      const templateQuestions = template.questions;
-      
-      // If we need more questions than we have in the template, limit to what we have
-      const questionsToUse = templateQuestions.slice(0, numQuestions);
-      
-      console.log("Using", questionsToUse.length, "questions from template");
-      
-      // Create questions for the room based on template questions
-      try {
-        await Promise.all(
-          questionsToUse.map(async (q: TemplateQuestion) => {
-            console.log("Creating question:", q.id);
-            
-            // Ensure options is properly formatted for database
-            let processedOptions;
-            try {
-              // Make sure options is properly serialized
-              processedOptions = typeof q.options === 'string' 
-                ? JSON.parse(q.options) 
-                : q.options;
-            } catch (e) {
-              console.error("Error processing options:", e);
-              processedOptions = ["Option A", "Option B", "Option C", "Option D"];
-            }
-            
-            return prisma.question.create({
-              data: {
-                roomId: room.id,
-                content: q.content,
-                options: processedOptions,
-                correctOption: q.correctOption,
-                explanation: q.explanation,
-              },
-            });
-          })
-        );
-      } catch (questionError) {
-        console.error('Error generating questions:', questionError);
-        return NextResponse.json(
-          { error: 'Failed to generate questions' },
-          { status: 500 }
-        );
+      for (const q of aiQuestions) {
+        const processedOptions = normalizeOptions(q.options);
+        await prisma.question.create({
+          data: {
+            roomId: room.id,
+            content: stripQuestionNumberPrefix(q.question),
+            options:
+              processedOptions.length >= 2
+                ? processedOptions
+                : ["Option A", "Option B", "Option C", "Option D"],
+            correctOption: q.correctOptionIndex,
+            explanation: q.explanation || "This is the correct answer.",
+          },
+        });
       }
 
       return NextResponse.json({ room });
