@@ -107,7 +107,7 @@ export default function CreateRoomPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-100 dark:bg-black">
+      <div className="flex justify-center items-center min-h-screen bg-brand-gradient">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -117,7 +117,7 @@ export default function CreateRoomPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-slate-100 dark:bg-black">
+      <main className="flex-1 bg-brand-gradient">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -137,7 +137,7 @@ export default function CreateRoomPage() {
             )}
 
             {createdRoom ? (
-              <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
+              <div className="card-elevated p-6">
                 <div className="text-center">
                   <div className="mb-2 inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,7 +184,7 @@ export default function CreateRoomPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6">
+              <div className="card-elevated p-6">
                 <form onSubmit={handleCreateRoom}>
                   <div className="space-y-6">
                     <div>

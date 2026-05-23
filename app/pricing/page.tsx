@@ -75,11 +75,11 @@ export default function PricingPage() {
     <div className="flex flex-col min-h-screen">
       <MainNav />
 
-      <main className="flex-1 bg-gradient-to-b dark:from-black dark:via-black dark:to-[#200559] bg-slate-50">
+      <main className="flex-1 bg-brand-gradient">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold mb-4">AI Quiz Generation Plans</h1>
+              <h1 className="text-4xl font-bold mb-4 text-violet-950 dark:text-white">AI Quiz Generation Plans</h1>
               <p className="text-lg text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
                 Unlock the power of AI to create engaging quizzes for education, training, or entertainment.
               </p>
@@ -89,8 +89,8 @@ export default function PricingPage() {
               {pricingPlans.map((plan) => (
                 <div 
                   key={plan.id}
-                  className={`dark:bg-slate-900 bg-white rounded-lg shadow-md overflow-hidden border-2 transition-all ${
-                    selectedPlan === plan.id ? 'border-indigo-500' : 'border-transparent'
+                  className={`card-elevated overflow-hidden border-2 transition-all ${
+                    selectedPlan === plan.id ? 'border-indigo-500 ring-2 ring-indigo-200/60' : 'border-violet-200/80'
                   }`}
                 >
                   <div className="p-6 border-b border-gray-100 dark:border-gray-800">

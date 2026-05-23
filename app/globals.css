@@ -1,17 +1,6 @@
 @import "tailwindcss";
-/* @import "tw-animate-css"; */
 
 @custom-variant dark (&:is(.dark *));
-
-.dark {
-  background-color: #0f0f0f;
-  color: white;
-}
-
-.light {
-  background-color: white;
-  color: black;
-}
 
 @theme inline {
   --color-background: var(--background);
@@ -51,41 +40,45 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-muted: var(--brand-muted);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --brand-deep: #200559;
+  --brand-muted: #5b21b6;
+  --background: oklch(0.99 0.012 285);
+  --foreground: oklch(0.28 0.06 285);
+  --card: oklch(1 0.008 285);
+  --card-foreground: oklch(0.28 0.06 285);
+  --popover: oklch(1 0.008 285);
+  --popover-foreground: oklch(0.28 0.06 285);
+  --primary: oklch(0.48 0.22 275);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.03 285);
+  --secondary-foreground: oklch(0.32 0.08 285);
+  --muted: oklch(0.96 0.02 285);
+  --muted-foreground: oklch(0.48 0.05 285);
+  --accent: oklch(0.94 0.04 285);
+  --accent-foreground: oklch(0.32 0.08 285);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
+  --border: oklch(0.9 0.03 285);
+  --input: oklch(0.92 0.025 285);
+  --ring: oklch(0.55 0.2 275);
+  --chart-1: oklch(0.55 0.22 275);
   --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --chart-3: oklch(0.45 0.12 285);
+  --chart-4: oklch(0.75 0.15 285);
+  --chart-5: oklch(0.65 0.18 275);
+  --sidebar: oklch(0.98 0.015 285);
+  --sidebar-foreground: oklch(0.28 0.06 285);
+  --sidebar-primary: oklch(0.48 0.22 275);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.94 0.04 285);
+  --sidebar-accent-foreground: oklch(0.32 0.08 285);
+  --sidebar-border: oklch(0.9 0.03 285);
+  --sidebar-ring: oklch(0.55 0.2 275);
 }
 
 .dark {
@@ -95,8 +88,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.65 0.2 275);
+  --primary-foreground: oklch(0.15 0.02 285);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -127,6 +120,33 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    @apply bg-gradient-to-b from-violet-50 via-indigo-50/90 to-white text-violet-950;
+    @apply dark:from-black dark:via-black dark:to-[#200559] dark:text-white;
+  }
+
+  .card-elevated {
+    @apply rounded-lg border border-violet-200/90 bg-white/95 text-violet-950 shadow-md shadow-violet-200/40;
+    @apply dark:border-indigo-600/50 dark:bg-slate-900/95 dark:text-white dark:shadow-none;
+  }
+
+  .nav-link {
+    @apply text-violet-800/90 transition-colors hover:text-indigo-700;
+    @apply dark:text-white/90 dark:hover:text-indigo-400;
+  }
+
+  .nav-link-active {
+    @apply font-medium text-indigo-700;
+    @apply dark:text-indigo-300;
+  }
+
+  .input-field {
+    @apply w-full rounded-md border border-violet-200 bg-white px-3 py-2 text-violet-950 placeholder:text-violet-500/50 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500;
+    @apply dark:border-gray-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500;
   }
 }
