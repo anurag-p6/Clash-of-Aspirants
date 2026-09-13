@@ -49,9 +49,24 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      const existing = await prisma.answer.findUnique({
+        where: {
+          userId_questionId: { userId, questionId },
+        },
+      });
+
+      if (existing) {
+        return NextResponse.json({
+          answer: existing,
+          isCorrect: existing.isCorrect,
+          correctOption: question.correctOption,
+          explanation: question.explanation,
+          alreadyAnswered: true,
+        });
+      }
+
       const isCorrect = selectedOption === question.correctOption;
 
-      // Create a new answer record
       const answer = await prisma.answer.create({
         data: {
           userId,
@@ -61,7 +76,6 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // If the answer is correct, update the participant's score
       if (isCorrect) {
         await prisma.roomParticipant.updateMany({
           where: {
@@ -69,53 +83,51 @@ export async function POST(req: NextRequest) {
             roomId: question.roomId,
           },
           data: {
-            score: {
-              increment: 1,
-            },
+            score: { increment: 1 },
           },
         });
 
-        // Also update the user's overall score
         await prisma.user.update({
-          where: {
-            id: userId,
-          },
+          where: { id: userId },
           data: {
-            score: {
-              increment: 1,
-            },
+            score: { increment: 1 },
           },
         });
       }
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         answer,
         isCorrect,
         correctOption: question.correctOption,
-        explanation: question.explanation
+        explanation: question.explanation,
+        alreadyAnswered: false,
       });
     } catch (dbError) {
-      console.error('Database error when submitting answer:', dbError);
-      console.log('Returning mock answer data for development');
-      
-      // Create mock answer data based on the selected option
-      // In development mode, make every answer correct for testing
-      const correctOption = selectedOption;
-      const isCorrect = true;
-      
-      return NextResponse.json({
-        answer: {
-          id: `mock-answer-${Date.now()}`,
-          userId,
-          questionId,
-          selectedOption,
-          isCorrect,
-          createdAt: new Date().toISOString()
-        },
-        isCorrect,
-        correctOption,
-        explanation: "This is a mock explanation provided because the database is unavailable. In a real environment, this would be the actual explanation for the correct answer."
-      });
+      console.error("Database error when submitting answer:", dbError);
+
+      const prismaError = dbError as { code?: string };
+      if (prismaError.code === "P2002") {
+        const [existing, questionRow] = await Promise.all([
+          prisma.answer.findUnique({
+            where: { userId_questionId: { userId, questionId } },
+          }),
+          prisma.question.findUnique({ where: { id: questionId } }),
+        ]);
+        if (existing && questionRow) {
+          return NextResponse.json({
+            answer: existing,
+            isCorrect: existing.isCorrect,
+            correctOption: questionRow.correctOption,
+            explanation: questionRow.explanation,
+            alreadyAnswered: true,
+          });
+        }
+      }
+
+      return NextResponse.json(
+        { error: "Failed to submit answer" },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error submitting answer:', error);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { generateQuizQuestions, QuizQuestion } from "@/lib/openai";
+import { normalizeOptions, stripQuestionNumberPrefix } from "@/lib/quiz-utils";
 
 const MOCK_QUESTION_MARKERS = [
   "assassination of Archduke Franz Ferdinand",
@@ -27,11 +28,20 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
     
     // Validate each question has the required properties
     questions.forEach((q, index) => {
-      if (!q.question || !Array.isArray(q.options) || q.options.length < 2 || 
-          typeof q.correctOptionIndex !== 'number') {
+      const idx =
+        typeof q.correctOptionIndex === "number"
+          ? q.correctOptionIndex
+          : parseInt(String(q.correctOptionIndex), 10);
+      if (
+        !q.question ||
+        !Array.isArray(q.options) ||
+        q.options.length < 2 ||
+        Number.isNaN(idx)
+      ) {
         console.error(`Invalid question at index ${index}:`, q);
         throw new Error(`Question ${index + 1} has invalid format`);
       }
+      q.correctOptionIndex = Math.max(0, Math.min(q.options.length - 1, idx));
     });
     
     const template = await prisma.quizTemplate.create({
@@ -41,18 +51,14 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
         questions: {
           create: questions.map(q => {
             // Ensure JSON is properly handled
-            let options;
-            try {
-              // If options is already an array, this will work
-              options = Array.isArray(q.options) ? q.options : JSON.parse(JSON.stringify(q.options));
-            } catch (e) {
-              console.error("Error processing options for question:", e);
-              options = ["Option A", "Option B", "Option C", "Option D"];
-            }
+            const options = normalizeOptions(q.options);
             
             return {
-              content: q.question,
-              options: options,
+              content: stripQuestionNumberPrefix(q.question),
+              options:
+                options.length >= 2
+                  ? options
+                  : ["Option A", "Option B", "Option C", "Option D"],
               correctOption: q.correctOptionIndex,
               explanation: q.explanation || "This is the correct answer",
             };
@@ -72,7 +78,18 @@ export async function createQuizTemplate(topic: string, questions: QuizQuestion[
 }
 
 /**
- * Generate and store a new quiz template
+ * Fresh AI questions for a new room (never reuses cached templates).
+ */
+export async function generateQuestionsForRoom(
+  topic: string,
+  numQuestions: number = 5,
+  difficulty: string
+): Promise<QuizQuestion[]> {
+  return generateQuizQuestions(topic, numQuestions, difficulty);
+}
+
+/**
+ * Generate and store a new quiz template (used for seeding / admin; may reuse cache).
  */
 export async function generateAndStoreQuizTemplate(topic: string, numQuestions: number = 5, difficulty: string) {
   try {
@@ -82,7 +99,9 @@ export async function generateAndStoreQuizTemplate(topic: string, numQuestions: 
         topic: { equals: topic, mode: "insensitive" },
         difficulty,
       },
-      include: { questions: true },
+      include: {
+        questions: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -113,7 +132,9 @@ export async function generateAndStoreQuizTemplate(topic: string, numQuestions: 
 export async function getQuizTemplate(templateId: string) {
   return prisma.quizTemplate.findUnique({
     where: { id: templateId },
-    include: { questions: true }
+    include: {
+      questions: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+    },
   });
 }
 
@@ -128,7 +149,9 @@ export async function findQuizTemplateByTopic(topic: string) {
         mode: "insensitive"
       }
     },
-    include: { questions: true }
+    include: {
+      questions: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+    },
   });
 }
 
